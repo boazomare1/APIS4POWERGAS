@@ -1,0 +1,126 @@
+[05-Nov-2020 12:19:26 Europe/London] PHP Fatal error:  Call to a member function registerCustomer() on null in /home/techsava/public_html/powergas_app/customers/customersEndpoint.php on line 38
+[05-Nov-2020 12:20:36 Europe/London] PHP Fatal error:  Call to a member function registerCustomer() on null in /home/techsava/public_html/powergas_app/customers/customersEndpoint.php on line 38
+[05-Nov-2020 12:21:15 Europe/London] PHP Fatal error:  Call to a member function registerCustomer() on null in /home/techsava/public_html/powergas_app/customers/customersEndpoint.php on line 38
+[05-Nov-2020 12:38:19 Europe/London] PHP Fatal error:  Call to a member function registerCustomer() on null in /home/techsava/public_html/powergas_app/customers/customersEndpoint.php on line 39
+[05-Nov-2020 12:39:02 Europe/London] PHP Fatal error:  Call to a member function execute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 75
+[05-Nov-2020 12:40:45 Europe/London] PHP Fatal error:  Call to a member function execute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 74
+[05-Nov-2020 12:41:11 Europe/London] PHP Fatal error:  Call to a member function execute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 74
+[27-Nov-2020 15:01:48 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:02:29 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:04:04 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:05:24 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:07:34 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:09:28 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:15:26 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:15:59 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:16:45 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:16:59 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:26:42 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:44:27 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 16
+[27-Nov-2020 15:44:27 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 198
+[27-Nov-2020 15:44:37 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 16
+[27-Nov-2020 15:44:37 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 198
+[27-Nov-2020 15:44:50 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:52:48 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 15:53:50 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 16:01:47 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 198
+[27-Nov-2020 16:01:47 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 16
+[27-Nov-2020 16:01:54 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 198
+[27-Nov-2020 16:01:54 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 16
+[27-Nov-2020 16:01:59 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 16:04:02 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 81
+[27-Nov-2020 16:04:14 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 16
+[27-Nov-2020 16:04:14 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 198
+[27-Nov-2020 16:14:45 Europe/London] PHP Fatal error:  Call to a member function fetchGroups() on null in /home/techsava/public_html/powergas_app/customers/customersEndpoint.php on line 39
+[27-Nov-2020 16:14:45 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 188
+[27-Nov-2020 16:15:32 Europe/London] PHP Fatal error:  Call to a member function fetchGroups() on null in /home/techsava/public_html/powergas_app/customers/customersEndpoint.php on line 39
+[27-Nov-2020 16:16:22 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/customers.php on line 188
+[27-Nov-2020 16:19:10 Europe/London] PHP Fatal error:  Call to a member function registerCustomer() on null in /home/techsava/public_html/powergas_app/customers/customersEndpoint.php on line 49
+[27-Nov-2020 16:19:56 Europe/London] PHP Fatal error:  Call to a member function registerCustomer() on null in /home/techsava/public_html/powergas_app/customers/customersEndpoint.php on line 49
+[27-Nov-2020 16:21:10 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 114
+[27-Nov-2020 16:21:14 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 114
+[27-Nov-2020 16:21:21 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 114
+[27-Nov-2020 16:22:27 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 143
+[27-Nov-2020 16:23:22 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 143
+[27-Nov-2020 16:23:37 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 143
+[01-Dec-2020 09:51:15 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 90
+[01-Dec-2020 09:51:16 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 90
+[14-Dec-2020 05:57:09 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 127
+[14-Dec-2020 05:57:19 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 127
+[14-Dec-2020 05:57:30 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 127
+[14-Dec-2020 05:57:46 Europe/London] PHP Fatal error:  Using $this when not in object context in /home/techsava/public_html/powergas_app/objects/customers.php on line 127
+[14-Dec-2020 06:01:38 Europe/London] PHP Fatal error:  Call to a member function execute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 132
+[14-Dec-2020 06:01:46 Europe/London] PHP Fatal error:  Call to a member function execute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 132
+[10-Jan-2021 11:49:39 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 11:49:42 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 11:49:44 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 11:49:45 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 11:49:48 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 11:49:49 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:12:43 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:13:01 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:13:38 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:14:13 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:14:43 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:15:14 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:15:40 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:15:46 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:16:15 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:16:44 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:17:11 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:17:15 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:17:37 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:34:55 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:35:07 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:35:18 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:35:27 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:35:41 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:48:42 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 12:49:20 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 13:57:19 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 13:57:29 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 13:57:39 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 13:59:24 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:42:06 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:42:38 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:42:38 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:42:42 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:43:09 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:43:38 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:44:38 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:45:09 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:45:46 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:45:58 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:46:30 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:47:00 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:47:25 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:53:33 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:56:52 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:57:10 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:57:52 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:57:53 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:58:20 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:58:42 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:58:49 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 15:59:38 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:00:04 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:00:35 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:03:37 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:03:53 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:04:03 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:04:22 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:04:57 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:05:28 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[10-Jan-2021 16:06:00 Europe/London] PHP Fatal error:  Cannot pass parameter 2 by reference in /home/techsava/public_html/powergas_app/objects/customers.php on line 93
+[30-Mar-2021 05:18:27 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 73
+[02-Jun-2021 05:23:39 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 73
+[02-Jun-2021 05:23:52 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 73
+[02-Jun-2021 05:23:59 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 73
+[02-Jun-2021 05:24:10 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 73
+[02-Jun-2021 05:24:12 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 73
+[21-Jun-2021 16:07:16] PHP Parse error:  syntax error, unexpected T_STRING, expecting T_OLD_FUNCTION or T_FUNCTION or T_VAR or '}' in /home/techsava/public_html/powergas_app/config/database.php on line 5
+[12-Aug-2021 12:25:35 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 74
+[17-Aug-2021 09:31:10 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 74
+[19-Aug-2021 11:17:44 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 74
+[30-Aug-2021 12:19:28 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 74
+[17-Sep-2021 12:30:22 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/customers.php on line 74

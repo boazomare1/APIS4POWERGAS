@@ -1,0 +1,14 @@
+RewriteEngine On
+<IfModule mod_rewrite.c>
+RewriteBase /powergas_app/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !=/favicon.ico
+
+RewriteRule ^login authentication/loginEndpoint.php
+RewriteRule ^products products/productsEndpoint.php
+RewriteRule ^sales sales/salesEndpoint.php
+RewriteRule ^register authentication/registerEndpoint.php
+RewriteRule ^customers customers/customersEndpoint.php
+RewriteRule ^expenses expense/expenseEndpoint.php
+</IfModule>

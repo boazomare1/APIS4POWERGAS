@@ -1,0 +1,6 @@
+{"Body":{"stkCallback":{"MerchantRequestID":"2405-25066274-1","CheckoutRequestID":"ws_CO_12032021214158131198","ResultCode":1032,"ResultDesc":"Request cancelled by user"}}}{"Body":{"stkCallback":{"MerchantRequestID":"2413-25068911-1","CheckoutRequestID":"ws_CO_12032021214325333875","ResultCode":1032,"ResultDesc":"Request cancelled by user"}}}
+{"Body":{"stkCallback":{"MerchantRequestID":"13446-25753066-1","CheckoutRequestID":"ws_CO_12032021214530238221","ResultCode":1032,"ResultDesc":"Request cancelled by user"}}}
+{"Body":{"stkCallback":{"MerchantRequestID":"18191-2559870-1","CheckoutRequestID":"ws_CO_12032021214644701786","ResultCode":1032,"ResultDesc":"Request cancelled by user"}}}
+{"Body":{"stkCallback":{"MerchantRequestID":"22090-3258550-1","CheckoutRequestID":"ws_CO_12032021214730056593","ResultCode":1032,"ResultDesc":"Request cancelled by user"}}}
+{"Body":{"stkCallback":{"MerchantRequestID":"25402-25084787-1","CheckoutRequestID":"ws_CO_12032021220221915714","ResultCode":1032,"ResultDesc":"Request cancelled by user"}}}
+{"Body":{"stkCallback":{"MerchantRequestID":"18650-24563457-1","CheckoutRequestID":"ws_CO_12032021221305870405","ResultCode":1032,"ResultDesc":"Request cancelled by user"}}}

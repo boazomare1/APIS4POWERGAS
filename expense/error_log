@@ -1,0 +1,1 @@
+[20-Aug-2021 16:43:01 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/expense.php on line 14

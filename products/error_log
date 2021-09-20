@@ -1,0 +1,19 @@
+[27-Nov-2020 15:09:29 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 14
+[27-Nov-2020 15:12:07 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 65
+[27-Nov-2020 15:15:27 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 14
+[27-Nov-2020 15:16:12 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 65
+[27-Nov-2020 15:43:07 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 14
+[27-Nov-2020 15:52:01 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 14
+[27-Nov-2020 16:00:11 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 14
+[27-Nov-2020 16:00:26 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 14
+[27-Nov-2020 16:01:44 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 14
+[27-Nov-2020 16:24:36 Europe/London] PHP Fatal error:  Class 'Common' not found in /home/techsava/public_html/powergas_app/objects/products.php on line 65
+[02-Jun-2021 05:23:40 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/products.php on line 5
+[02-Jun-2021 05:24:31 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/products.php on line 5
+[21-Jun-2021 16:07:18] PHP Parse error:  syntax error, unexpected T_STRING, expecting T_OLD_FUNCTION or T_FUNCTION or T_VAR or '}' in /home/techsava/public_html/powergas_app/config/database.php on line 5
+[11-Aug-2021 09:25:56 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/products.php on line 5
+[13-Aug-2021 05:38:14 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/products.php on line 70
+[14-Aug-2021 12:16:54 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/products.php on line 70
+[19-Aug-2021 10:29:24 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/products.php on line 5
+[20-Aug-2021 11:51:52 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/products.php on line 5
+[13-Sep-2021 08:20:17 Europe/London] PHP Fatal error:  Call to a member function setAttribute() on null in /home/techsava/public_html/powergas_app/objects/products.php on line 70

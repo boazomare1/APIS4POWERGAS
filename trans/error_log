@@ -1,0 +1,16 @@
+[13-Mar-2021 08:16:04 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:16:51 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:17:43 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 15
+[13-Mar-2021 08:18:13 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:18:15 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:18:48 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:20:54 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:20:56 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:21:42 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 15
+[13-Mar-2021 08:22:18 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:24:05 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 18
+[13-Mar-2021 08:26:37 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:26:41 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 14
+[13-Mar-2021 08:28:03 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 16
+[13-Mar-2021 08:28:06 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 16
+[13-Mar-2021 08:28:07 Europe/London] PHP Fatal error:  Call to undefined method mysqli::setAttribute() in /home/techsava/public_html/powergas_app/trans/confirm_url.php on line 16
