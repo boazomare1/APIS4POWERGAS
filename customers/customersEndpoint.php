@@ -65,8 +65,7 @@ if($action == "register_customers"){
             $customerObj->salesman_id,
             $customerObj->phone_2);
     } 
-    $response1= array("success" => "2", "message" => "nothing yet");
-    echo json_encode($response1);
+    echo json_encode($response);
     
 }
 
