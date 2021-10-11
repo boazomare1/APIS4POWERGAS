@@ -2,7 +2,7 @@
 class Database{
   
     // specify your own database credentials
-    private $host = "localhost";
+    private $host = "127.0.0.1";
     private $db_name = "techsava_powergas";
     private $username = "root";
     private $password = "Trymenot#123$";
