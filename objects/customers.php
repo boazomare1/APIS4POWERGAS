@@ -141,6 +141,7 @@ AND NOT EXISTS
 
  
     function registerCustomer($group_id, $group_name, $name, $country, $email, $phone, $logo, $lat, $lng, $town_id, $shop_name, $route_id, $distributor_id,$salesman_id, $phone_2){
+        die(print_r("reached"));
         global $conn;
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -177,7 +178,7 @@ AND NOT EXISTS
                 $stmt->execute();
 
                 $customer_id = $conn->lastInsertId();
-                die(print_r($customer_id));
+                
                 addShop($customer_id,$route_id,$shop_name,$lat,$lng, $logo, $distributor_id, $salesman_id);
                
                 addCustomerPaymentMethod($customer_id,1);//default mpesa
