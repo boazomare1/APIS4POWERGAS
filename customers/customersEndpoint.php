@@ -1,7 +1,7 @@
 <?php
 // required headers
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
+//header("Access-Control-Allow-Origin: *");
+//header("Content-Type: application/json; charset=UTF-8");
 
 require '../config/database.php';
 require '../objects/customers.php';
@@ -45,7 +45,7 @@ if($action == "customer_groups"){
 }
 
 if($action == "register_customers"){
-    die(print_r("reached"));
+    print_r("reached");
     $json = file_get_contents('php://input');
     $data = json_decode($json);
     die(print_r($json));
