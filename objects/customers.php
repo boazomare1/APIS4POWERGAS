@@ -177,7 +177,7 @@ AND NOT EXISTS
                 $stmt->execute();
 
                 $customer_id = $conn->lastInsertId();
-                addShop($customer_id,$route_id,$shop_name,$lat,$lng, $logo, $distributor_id, $salesman_id);
+                //addShop($customer_id,$route_id,$shop_name,$lat,$lng, $logo, $distributor_id, $salesman_id);
                 //die();
                 addCustomerPaymentMethod($customer_id,1);//default mpesa
                 addCustomerPaymentMethod($customer_id,2);//default cash
