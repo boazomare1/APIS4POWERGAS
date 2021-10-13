@@ -1,7 +1,8 @@
 <?php
 // required headers
-//header("Access-Control-Allow-Origin: *");
-//header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+ini_set("allow_url_fopen", true);
 
 require '../config/database.php';
 require '../objects/customers.php';
