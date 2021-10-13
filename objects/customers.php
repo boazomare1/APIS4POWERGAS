@@ -159,7 +159,7 @@ AND NOT EXISTS
             $stmt9->execute();
             if($stmt9->rowCount() == 0){
             $query = "INSERT INTO sma_customers(distributor_id, salesman_id, group_id, group_name, customer_group_id, customer_group_name, name, city, country, phone, phone2, email, is_subsidiary) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
+ 
                 $stmt = $conn->prepare($query);
                 $stmt->bindValue(1, $distributor_id);
 				$stmt->bindValue(2, $salesman_id);
@@ -177,8 +177,9 @@ AND NOT EXISTS
                 $stmt->execute();
 
                 $customer_id = $conn->lastInsertId();
-                //addShop($customer_id,$route_id,$shop_name,$lat,$lng, $logo, $distributor_id, $salesman_id);
-                //die();
+                die(print_r($customer_id));
+                addShop($customer_id,$route_id,$shop_name,$lat,$lng, $logo, $distributor_id, $salesman_id);
+               
                 addCustomerPaymentMethod($customer_id,1);//default mpesa
                 addCustomerPaymentMethod($customer_id,2);//default cash
                 
