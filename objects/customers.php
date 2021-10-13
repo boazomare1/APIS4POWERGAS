@@ -141,7 +141,6 @@ AND NOT EXISTS
 
  
     function registerCustomer($group_id, $group_name, $name, $country, $email, $phone, $logo, $lat, $lng, $town_id, $shop_name, $route_id, $distributor_id,$salesman_id, $phone_2){
-        die(print_r("reached"));
         global $conn;
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
