@@ -93,7 +93,7 @@ AND NOT EXISTS
   (SELECT *
    FROM   sma_tickets
    WHERE  sma_shops.id = sma_tickets.shop_id and sma_tickets.date = CURRENT_DATE and sma_tickets.created_at < ?) and 
-   sma_vehicles.id = ? and sma_customers.active = 1 and sma_allocation_days.day = ? and sma_shops.duration > 0 and sma_vehicle_route.day = ? and 
+   sma_vehicles.id = ? and sma_customers.active = 1 and sma_allocation_days.day = ? and sma_shops.duration > 0 and sma_shops.vehicle = ? and sma_vehicle_route.day = ? and 
    sma_allocation_days.expiry IS NULL or sma_allocation_days.expiry <= CURRENT_TIMESTAMP GROUP BY sma_shops.id ORDER BY sma_shops.duration ASC";
 
             $current_date = date("Y-m-d").' '.'23:59:00';
@@ -102,7 +102,8 @@ AND NOT EXISTS
             $stmt->bindParam(2, $current_date);
             $stmt->bindParam(3, $vehicle_id);
             $stmt->bindParam(4, $day);
-            $stmt->bindParam(5, $day);
+            $stmt->bindParam(5, $vehicle_id);
+            $stmt->bindParam(6, $day);
             $stmt->execute();
             
         $status= "SELECT status FROM sma_companies WHERE sma_companies.id=?";
