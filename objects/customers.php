@@ -93,7 +93,7 @@ AND NOT EXISTS
   (SELECT *
    FROM   sma_tickets
    WHERE  sma_shops.id = sma_tickets.shop_id and sma_tickets.date = CURRENT_DATE and sma_tickets.created_at < ?) and 
-   sma_vehicles.id = ? and sma_customers.active = 1 and sma_allocation_days.day = ? and sma_allocation_days.duration > 0  and sma_vehicle_route.day = ? and 
+   sma_vehicles.id = ? and sma_customers.active = 1 and sma_allocation_days.day = ? and sma_allocation_days.duration > 0 and sma_vehicle_route.day = ? and 
    sma_allocation_days.expiry IS NULL or sma_allocation_days.expiry <= CURRENT_TIMESTAMP GROUP BY sma_shops.id ORDER BY sma_allocation_days.duration ASC";
 
             $current_date = date("Y-m-d").' '.'23:59:00';
