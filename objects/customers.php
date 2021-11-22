@@ -103,7 +103,7 @@ AND NOT EXISTS
             $stmt->bindParam(3, $vehicle_id);
             $stmt->bindParam(4, $day);
             $stmt->bindParam(5, $day);
-            $stmt->bindParam(6, $salesman_id);
+            $stmt->bindParam(6, $vehicle_id);
             $stmt->execute();
             
         $status= "SELECT status FROM sma_companies WHERE sma_companies.id=?";
