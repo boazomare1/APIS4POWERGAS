@@ -7,7 +7,7 @@ require '../common/common.php';
         $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
         try {
-            $query = "SELECT sma_sales.id as sale_id, sma_sales.updated_at as updated_at, sma_sales.date, sma_sales.customer_id, sma_sales.customer, sma_sales.grand_total, sma_sales.payment_status,sma_sales.shop_id, sma_shops.shop_name, sma_shops.lat, sma_shops.lng, sma_shops.image, sma_customers.phone, sma_customers.city, sma_customers.customer_group_name FROM sma_sales LEFT JOIN sma_shops ON sma_sales.shop_id = sma_shops.id LEFT JOIN sma_customers ON sma_shops.customer_id = sma_customers.id WHERE sma_sales.salesman_id=? AND sma_sales.vehicle_id=? AND sma_sales.sales_type='SSO'  AND sma_sales.date >= DATE(NOW()) - INTERVAL 7 DAY ORDER BY sma_sales.updated_at DESC";
+            $query = "SELECT sma_sales.id as sale_id, sma_sales.updated_at as updated_at, sma_sales.date, sma_sales.customer_id, sma_sales.customer, sma_sales.grand_total, sma_sales.payment_status,sma_sales.shop_id, sma_shops.shop_name, sma_shops.lat, sma_shops.lng, sma_shops.image, sma_customers.phone, sma_customers.city, sma_customers.customer_group_name FROM sma_sales LEFT JOIN sma_shops ON sma_sales.shop_id = sma_shops.id LEFT JOIN sma_customers ON sma_shops.customer_id = sma_customers.id WHERE sma_sales.salesman_id=? AND sma_sales.vehicle_id=? AND sma_sales.sales_type='SSO' AND sma_sales.date = CURDATE() ORDER BY sma_sales.updated_at DESC";
             
             $stmt = $conn->prepare($query);
             $stmt->bindParam(1, $salesman_id);
