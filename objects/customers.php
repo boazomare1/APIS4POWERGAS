@@ -134,9 +134,9 @@ AND NOT EXISTS
             $stmt->bindParam(1, $current_date);
             $stmt->bindParam(2, $current_date);
             $stmt->bindParam(3, $vehicle_id);
-            $stmt->bindParam(3, $today);
-            $stmt->bindParam(4, $day);
+            $stmt->bindParam(4, $today);
             $stmt->bindParam(5, $day);
+            $stmt->bindParam(6, $day);
             $stmt->execute();
             
         $status= "SELECT status FROM sma_companies WHERE sma_companies.id=?";
