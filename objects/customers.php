@@ -125,14 +125,16 @@ AND NOT EXISTS
   (SELECT *
    FROM   sma_tickets
    WHERE  sma_shops.id = sma_tickets.shop_id and sma_tickets.date = CURRENT_DATE and sma_tickets.created_at < ?) and 
-   sma_vehicles.id = ? and sma_customers.active = 1 and sma_allocation_days.day = ? and sma_vehicle_route.day = ? and 
-   sma_allocation_days.expiry IS NULL or sma_allocation_days.expiry <= CURRENT_TIMESTAMP GROUP BY sma_shops.id ORDER BY sma_shop_allocations.id";
+   sma_vehicles.id = ? and ((sma_customers.active = 0 and sma_customers.disabled_date != ?) or sma_customers.active = 1 ) and sma_allocation_days.day = ? and sma_vehicle_route.day = ? and 
+   sma_allocation_days.expiry IS NULL or sma_allocation_days.expiry <= CURRENT_TIMESTAMP GROUP BY sma_shops.id ORDER BY sma_allocation_days.position ASC";
 
             $current_date = date("Y-m-d").' '.'23:59:00';
+            $today = date("Y-m-d");
             $stmt = $conn->prepare($query);
             $stmt->bindParam(1, $current_date);
             $stmt->bindParam(2, $current_date);
             $stmt->bindParam(3, $vehicle_id);
+            $stmt->bindParam(3, $today);
             $stmt->bindParam(4, $day);
             $stmt->bindParam(5, $day);
             $stmt->execute();
