@@ -291,7 +291,7 @@ AND NOT EXISTS
     			
     			$json[] = $data;
                 $json_data = json_encode($json);
-                $username = "admin";
+                $username = "pos-api";
                 $password = "admin";
                 $headers = array(
                     'Authorization: Basic '. base64_encode($username.':'.$password),
