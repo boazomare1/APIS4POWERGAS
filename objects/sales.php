@@ -1,7 +1,7 @@
 <?php
 require '../common/common.php';
   
-    function fetchSales($salesman_id, $vehicle_id){
+    /**function fetchSales($salesman_id, $vehicle_id){
         global $conn;
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -48,7 +48,60 @@ require '../common/common.php';
             print_r($e);
         }
         return $response;
-    } 
+    } **/
+    function fetchSales($salesman_id, $vehicle_id){
+        global $conn;
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+        try {
+            $query = "SELECT sma_sales.id as sale_id, sma_sales.updated_at as updated_at, sma_sales.date, sma_sales.customer_id, sma_sales.customer, sma_sales.grand_total, sma_sales.payment_status,sma_sales.shop_id, sma_shops.shop_name, sma_shops.lat, sma_shops.lng, sma_shops.image, sma_customers.phone, sma_customers.city, sma_customers.customer_group_name FROM sma_sales LEFT JOIN sma_shops ON sma_sales.shop_id = sma_shops.id LEFT JOIN sma_customers ON sma_shops.customer_id = sma_customers.id WHERE sma_sales.salesman_id=? AND sma_sales.vehicle_id=? AND sma_sales.sales_type='SSO'  AND sma_sales.date >= DATE_ADD(NOW(), INTERVAL -7 DAY) 
+            UNION ALL
+            SELECT sma_ticket_sales.id as sale_id, sma_ticket_sales.updated_at as updated_at, sma_ticket_sales.date, sma_ticket_sales.customer_id, sma_ticket_sales.customer, sma_ticket_sales.grand_total, sma_ticket_sales.payment_status,sma_ticket_sales.shop_id, sma_shops.shop_name, sma_shops.lat, sma_shops.lng, sma_shops.image, sma_customers.phone, sma_customers.city, sma_customers.customer_group_name FROM sma_ticket_sales LEFT JOIN sma_shops ON sma_ticket_sales.shop_id = sma_shops.id LEFT JOIN sma_customers ON sma_shops.customer_id = sma_customers.id WHERE sma_ticket_sales.salesman_id=? AND sma_ticket_sales.vehicle_id=? AND sma_ticket_sales.sales_type='SSO'  AND sma_ticket_sales.date >= DATE_ADD(NOW(), INTERVAL -7 DAY)
+            ORDER BY updated_at";
+            
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(1, $salesman_id);
+            $stmt->bindParam(2, $vehicle_id);
+            $stmt->bindParam(3, $salesman_id);
+            $stmt->bindParam(4, $vehicle_id);
+            $stmt->execute();
+           
+            $response = array();
+            if($stmt->rowCount()>0){
+                while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+                    $response[] = array(
+                        "id"=>$row['sale_id'],
+                        "date"=>$row['date'],
+                        "shop_name"=>$row['shop_name'],
+                        "lat"=>$row['lat'],
+                        "lng"=>$row['lng'],
+                        "image"=>$row['image'],
+                        "phone"=>$row['phone'],
+                        "customer_group_name"=>$row['customer_group_name'],
+                        "customer"=>$row['customer'],
+                        "customer_id"=>$row['customer_id'],
+                        "payment_status"=>$row['payment_status'],
+                        "grand_total"=>intval($row['grand_total']),
+                        "city"=>$row['city'],
+                        "updated_at"=>$row['updated_at'],
+                        "shop_id"=>$row['shop_id'],
+                        "payments"=>get_sale_payments($conn, $row['sale_id']),
+                        "products"=>get_sma_sales($conn, $row['sale_id']),
+                        
+                    );
+                }
+                return $response;
+            }else{
+                return array();
+            }
+
+        } catch (Exception $e) {
+            $response= array("success"=>"0", "message"=>"Order Failed");
+            //print_r($e);
+        }
+        return $response;
+    }
     
     
     function fetchDiscount($conn, $salesman_id, $vehicle_id){
