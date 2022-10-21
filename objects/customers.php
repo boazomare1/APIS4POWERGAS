@@ -145,17 +145,22 @@ WHERE NOT EXISTS
 AND NOT EXISTS
   (SELECT *
    FROM   sma_tickets
-   WHERE  sma_shops.id = sma_tickets.shop_id and sma_tickets.date = CURRENT_DATE and sma_tickets.created_at < ?) and 
+   WHERE  sma_shops.id = sma_tickets.shop_id and sma_tickets.date = CURRENT_DATE and sma_tickets.created_at < ?) 
+   and 
+   sma_allocation_days.id NOT IN(SELECT allocation_id from sma_temporary_alloc_disable WHERE disabled_date = ? and vehicle_id= ?)
+     and
    sma_vehicles.id = ? and sma_customers.active = 1 and ((sma_allocation_days.active = 0 and sma_allocation_days.disabled_date != ?) or sma_allocation_days.active = 1 ) and sma_allocation_days.day = ? and sma_vehicle_route.day = ? GROUP BY sma_shops.id ORDER BY sma_allocation_days.position ASC";
             $current_date = date("Y-m-d").' '.'23:59:00';
             $today = date("Y-m-d");
             $stmt = $conn->prepare($query);
             $stmt->bindParam(1, $current_date);
             $stmt->bindParam(2, $current_date);
-            $stmt->bindParam(3, $vehicle_id);
-            $stmt->bindParam(4, $today);
-            $stmt->bindParam(5, $day);
-            $stmt->bindParam(6, $day);
+            $stmt->bindParam(3, $current_date);
+            $stmt->bindParam(4, $vehicle_id);
+            $stmt->bindParam(5, $vehicle_id);
+            $stmt->bindParam(6, $today);
+            $stmt->bindParam(7, $day);
+            $stmt->bindParam(8, $day);
             $stmt->execute();
             
         $status= "SELECT status FROM sma_companies WHERE sma_companies.id=?";
