@@ -202,8 +202,7 @@ AND NOT EXISTS
         global $conn;
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-        $response = "";
-            
+        $response = "";            
             try {
                 
             $query9 = "SELECT * FROM sma_customers WHERE phone = ?";
@@ -212,11 +211,10 @@ AND NOT EXISTS
             $stmt9 = $conn->prepare($query9);
             $stmt9->bindParam(1, $phone);
 
-
             // execute query
             $stmt9->execute();
             if($stmt9->rowCount() == 0){
-            $query = "INSERT INTO sma_customers(distributor_id, salesman_id, group_id, group_name, customer_group_id, customer_group_name, name, city, country, phone, phone2, email, is_subsidiary) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            $query = "INSERT INTO sma_customers(distributor_id, salesman_id, group_id, group_name, customer_group_id, customer_group_name, name, city, country, phone, phone2, email, is_subsidiary, customer_alignment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
  
                 $stmt = $conn->prepare($query);
                 $stmt->bindValue(1, $distributor_id);
@@ -232,6 +230,7 @@ AND NOT EXISTS
                 $stmt->bindParam(11, $phone_2);
                 $stmt->bindParam(12, $email);
                 $stmt->bindValue(13, 0);
+                $stmt->bindValue(14, 0);
                 $stmt->execute();
 
                 $customer_id = $conn->lastInsertId();

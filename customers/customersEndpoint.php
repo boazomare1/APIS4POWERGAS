@@ -45,10 +45,8 @@ if($action == "customer_groups"){
 }
 
 if($action == "register_customers"){
-   // print_r("reached");
     $json = file_get_contents('php://input');
     $data = json_decode($json);
-   // die(print_r($json));
     foreach($data as $customerObj){
         $response = registerCustomer(
             $customerObj->group_id,
