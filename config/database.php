@@ -2,11 +2,11 @@
 class Database{
   
     // specify your own database credentials
-    private $host = "127.0.0.1";
+    private $host = "mariadb";
     private $db_name = "techsava_powergas";
     private $username = "root";
     private $password = "Trymenot#123$";
-    private $port = "3320";
+    private $port = "3321";
     public $conn;
   
     // get the database connection
@@ -15,7 +15,7 @@ class Database{
         $this->conn = null;
   
         try{
-            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name. ";port=" . $this->port, $this->username, $this->password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode="TRADITIONAL"') );
+            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name. ";", $this->username, $this->password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode="TRADITIONAL"') );
             $this->conn->exec("set names utf8");
         }catch(PDOException $exception){
             echo "Connection error: " . $exception->getMessage();
