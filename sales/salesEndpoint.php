@@ -26,7 +26,7 @@ if($action == "fetch_sales"){
 }
 
 if($action == "fetch_all_sales"){
-    $response= fetchAllSales($distributor_id);
+    $response= fetchAllSales("954");
 
     echo json_encode($response);
     

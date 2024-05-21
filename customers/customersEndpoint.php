@@ -24,8 +24,13 @@ if($action == "fetch_distributor"){
 }
 
 if($action == "fetch_customers"){
-    $response= fetchCustomers($vehicle_id, $day,$salesman_id);
+    $salesman_id = isset($_GET['salesman_id']) ? intval($_GET['salesman_id']) : 0;
+    $vehicle_id = isset($_GET['vehicle_id']) ? intval($_GET['vehicle_id']) : 0;
+    $day = isset($_GET['day']) ? intval($_GET['day']) : 0;
+    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10; // Default to 10 if not provided
 
+    $response = fetchCustomers($vehicle_id, $day, $salesman_id, $page, $limit);
     echo json_encode($response);
     
 }

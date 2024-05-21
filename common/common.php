@@ -195,23 +195,27 @@
     } 
     
     
-    function fetchPayments($conn, $payment_id){
+    function fetchPayments($conn, $payment_id) {
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         $response = '';
-        $query = "SELECT country FROM 0_payment_terms WHERE id =?";
+    
+        $query = "SELECT country FROM 0_payment_terms WHERE id = ?";
         
         try {
             $stmt = $conn->prepare($query);
-            $stmt->bindValue(1, $country_id);
+            $stmt->bindValue(1, $payment_id);
             $stmt->execute();
-        if($stmt->rowCount()>0){
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $response = $row['country'];
+    
+            if ($stmt->rowCount() > 0) {
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                $response = $row['country'];
             }
         } catch (Exception $ex) {
-            $response = array('resp_msg'=>'Operation Failed ', 'error'=>$ex);
+            $response = array('resp_msg' => 'Operation Failed', 'error' => $ex->getMessage());
         }
+    
         return $response;
-    }  
+    }
+      
 ?>

@@ -2,11 +2,11 @@
 class Database{
   
     // specify your own database credentials
-    private $host = "mariadb";
+    private $host = "127.0.0.1";
     private $db_name = "techsava_powergas";
     private $username = "root";
-    private $password = "Trymenot#123$";
-    private $port = "3321";
+    private $password = "";
+    private $port = "3300";
     public $conn;
   
     // get the database connection

@@ -282,38 +282,44 @@ require '../common/common.php';
     
     function fetchAllSales($distributor_id){
         global $conn;
+        
+        // Set PDO attributes
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+        
         try {
-            $query = "SELECT id, date, distributor_id, customer_id, customer, total, delivery_status FROM sma_sales WHERE delivery_status = 'delivered' AND distributor_id = $distributor_id ORDER BY created DESC LIMIT 15";
-
+            // Prepare the SQL query
+            $query = "SELECT id, date, distributor_id, customer_id, customer, total, payment_status 
+                      FROM sma_sales 
+                      WHERE payment_status = 'paid' AND distributor_id = :distributor_id 
+                      ORDER BY created DESC 
+                      LIMIT 15";
+    
             $stmt = $conn->prepare($query);
+            $stmt->bindParam(':distributor_id', $distributor_id, PDO::PARAM_INT);
             $stmt->execute();
             
-
             $response = array();
-            if($stmt->rowCount()>0){
-                while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-
+            if($stmt->rowCount() > 0) {
+                while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $products = get_sma_sales($conn, $row['id']); // Assuming get_sma_sales is a standalone function
                     $response[] = array(
-                        "id"=>$row['id'],
-                        "date"=>$row['date'],
-                        "agent"=>$row['customer'],
-                        "agent_id"=>$row['customer_id'],
-                        "total"=>$row['total'],
-                        "products"=>$common->get_sma_sales($this->conn, $row['id'])
+                        "id" => $row['id'],
+                        "date" => $row['date'],
+                        "agent" => $row['customer'],
+                        "agent_id" => $row['customer_id'],
+                        "total" => $row['total'],
+                        "products" => $products
                     );
                 }
-
-                return $response;
-            }else{
-                return array();
+                return array("success" => "1", "message" => "ok", "data" => $response);
+            } else {
+                return array("success" => "1", "message" => "No data available", "data" => array());
             }
-
         } catch (Throwable $th) {
-            $response= array("success"=>"0", "message"=>"Order Failed");
-            print_r($th->getMessage());
+            return array("success" => "0", "message" => "Order Failed: " . $th->getMessage());
         }
-        return $response;
-    } 
+    }
+    
+    
 ?>
