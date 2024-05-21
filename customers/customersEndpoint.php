@@ -30,7 +30,7 @@ if($action == "fetch_customers"){
     $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10; // Default to 10 if not provided
 
-    $response = fetchCustomers($vehicle_id, $day, $salesman_id, $page, $limit);
+    $response = fetchCustomers($vehicle_id, $day, $salesman_id);
     echo json_encode($response);
     
 }
