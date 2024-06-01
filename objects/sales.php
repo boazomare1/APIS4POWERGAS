@@ -102,6 +102,35 @@ require '../common/common.php';
         }
         return $response;
     }
+
+    function fetchSalesWithTotal($salesman_id, $vehicle_id, $start_date, $end_date) {
+        global $conn;
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    
+        try {
+            $query = "SELECT SUM(grand_total) AS total_sales
+                      FROM sma_sales
+                      WHERE salesman_id=? AND vehicle_id=? AND date BETWEEN ? AND ?";
+    
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(1, $salesman_id);
+            $stmt->bindParam(2, $vehicle_id);
+            $stmt->bindParam(3, $start_date);
+            $stmt->bindParam(4, $end_date);
+            $stmt->execute();
+           
+            $total_sales = $stmt->fetch(PDO::FETCH_ASSOC)['total_sales'];
+    
+            return $total_sales !== null ? intval($total_sales) : 0;
+        } catch (Exception $e) {
+            return 0; // Return 0 in case of any errors
+        }
+    }
+
+    
+    
+    
     
     
     function fetchDiscount($conn, $salesman_id, $vehicle_id){

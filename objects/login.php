@@ -30,23 +30,12 @@ class Login
 
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 if (password_verify($password, $row['password'])) {
-                    $pwas = password_verify("powergas001", $row['password']);
-
-
                     if ($row['active'] == "1") {
 
                         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                        $query2 = "SELECT s.id, s.username, s.email, s.first_name, s.last_name, s.phone, s.avatar, c.id as salesman_id, c.vehicle_id, v.plate_no, v.discount_enabled, r.id as route_id, c.group_id ,c.distributor_id, c.group_name as name
-           FROM sma_users s 
-           INNER JOIN sma_companies c ON s.company_id = c.id 
-           INNER JOIN sma_vehicles v ON c.vehicle_id = v.id 
-           INNER JOIN sma_routes r ON v.plate_no = r.name
-           WHERE s.email = ?";
-
-
-
-
+                        $query2 = "SELECT s.id, s.username, s.email, s.first_name, s.last_name, s.phone, s.avatar, c.id as salesman_id, s.stock, c.vehicle_id, v.plate_no, v.discount_enabled, r.id as route_id, c.group_id ,c.distributor_id, c.group_name as name
+                        FROM sma_users s INNER JOIN sma_companies c ON s.company_id = c.id INNER JOIN sma_vehicles v ON c.vehicle_id = v.id INNER JOIN sma_routes r ON v.plate_no = r.name WHERE s.email = ?";
 
                         $stmt2 = $this->conn->prepare($query2);
                         $stmt2->bindParam(1, $email);
@@ -72,10 +61,6 @@ class Login
             http_response_code(404);
             $response = array("success" => "2", "message" => "error occured");
         }
-        $response['user']['stock'] = 0;
-
-
-
         return $response;
     }
 

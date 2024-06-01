@@ -579,4 +579,109 @@ function fetchCounty($county_id)
     }
     return $response;
 }
+
+function raiseTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor_id, $vehicle_id)
+{
+    global $conn; // Assume $conn is your database connection
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+    try {
+        // Begin a transaction
+        $conn->beginTransaction();
+
+        // Update customer status to inactive
+        $query = "UPDATE sma_customers SET active = 0 WHERE id = :customer_id";
+        $stmt = $conn->prepare($query);
+        $stmt->execute(['customer_id' => $customer_id]);
+
+        // Commit the transaction
+        $conn->commit();
+
+        // Return a success response
+        return [
+            "status" => "success",
+            "message" => "Ticket raised and customer status updated successfully",
+            "ticket_id" => rand(1000, 9999),
+            "details" => [
+                "customer_id" => $customer_id,
+                "salesman_id" => $salesman_id,
+                "reason" => $reason,
+                "shop_id" => $shop_id,
+                "distributor_id" => $distributor_id,
+                "vehicle_id" => $vehicle_id
+            ]
+        ];
+    } catch (Exception $e) {
+        // Rollback the transaction on error
+        $conn->rollBack();
+
+        // Log the error (optional)
+        error_log($e->getMessage());
+
+        // Return an error response
+        return [
+            "status" => "error",
+            "message" => "Failed to raise ticket and update customer status",
+            "error" => $e->getMessage()
+        ];
+    }
+}
+
+function makeSale($discount, $invoice, $cheque, $image, $invoice_id, $discount_id, $cheque_id, $json, $customer_id, $distributor_id, $town_id, $salesman_id, $paid_by, $vehicle_id, $payment_status, $shop_id, $total, $payments, $signature) {
+    global $conn; // Assume $conn is your PDO database connection
+
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+    try {
+        $conn->beginTransaction();
+
+        // Decode JSON arrays
+        $items = json_decode($json, true);
+        $paymentDetails = json_decode($payments, true);
+
+        // Insert into sales table
+        $query = "INSERT INTO sales (discount, invoice, cheque, image, invoice_id, discount_id, cheque_id, customer_id, distributor_id, town_id, salesman_id, paid_by, vehicle_id, payment_status, shop_id, total, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($query);
+        $stmt->execute([$discount, $invoice, $cheque, $image, $invoice_id, $discount_id, $cheque_id, $customer_id, $distributor_id, $town_id, $salesman_id, $paid_by, $vehicle_id, $payment_status, $shop_id, $total, $signature]);
+
+        // Get the last inserted ID
+        $sale_id = $conn->lastInsertId();
+
+        // Insert sale items
+        foreach ($items as $item) {
+            $query = "INSERT INTO sale_items (sale_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
+            $stmt = $conn->prepare($query);
+            $stmt->execute([$sale_id, $item['product_id'], $item['quantity'], $item['price']]);
+        }
+
+        // Insert payment details
+        foreach ($paymentDetails as $payment) {
+            $query = "INSERT INTO sale_payments (sale_id, payment_method, amount) VALUES (?, ?, ?)";
+            $stmt = $conn->prepare($query);
+            $stmt->execute([$sale_id, $payment['method'], $payment['amount']]);
+        }
+
+        $conn->commit();
+
+        return [
+            "status" => "success",
+            "message" => "Sale added successfully",
+            "sale_id" => $sale_id
+        ];
+    } catch (Exception $e) {
+        $conn->rollBack();
+
+        // Log the error (optional)
+        error_log($e->getMessage());
+
+        return [
+            "status" => "error",
+            "message" => "Failed to add sale",
+            "error" => $e->getMessage()
+        ];
+    }
+}
+
 ?>

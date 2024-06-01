@@ -19,6 +19,7 @@ $password = isset($_GET['password']) ? $_GET['password'] : die();
 $action = isset($_GET['action']) ? $_GET['action'] : die();
 
 if($action == "login_user"){
+    // echo password_hash($password, PASSWORD_BCRYPT);
     $response = $login->loginUser($email, $password);
     echo json_encode($response);
 }

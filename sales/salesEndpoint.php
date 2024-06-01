@@ -38,6 +38,16 @@ if($action == "fetch_discount"){
     echo json_encode($response);
     
 }
+if ($action == "fetch_sales_total") {
+    $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
+    $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
+
+    // Perform validation on $start_date and $end_date if necessary
+
+    $response = fetchSalesWithTotal( $salesman_id, $vehicle_id, $start_date, $end_date);
+
+    echo json_encode($response);
+}
 
 if($action == "fetch_cheque"){
     $response= fetchCheque($conn, $salesman_id, $vehicle_id);
