@@ -590,28 +590,41 @@ function raiseTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor
         // Begin a transaction
         $conn->beginTransaction();
 
-        // Update customer status to inactive
-        $query = "UPDATE sma_customers SET active = 0 WHERE id = :customer_id";
-        $stmt = $conn->prepare($query);
-        $stmt->execute(['customer_id' => $customer_id]);
+        // Insert into sma_tickets
+        $insertQuery = "INSERT INTO sma_tickets (distributor_id, salesman_id, customer_id, vehicle_id, shop_id, reason, date, created_at, status)
+                        VALUES (:distributor_id, :salesman_id, :customer_id, :vehicle_id, :shop_id, :reason, :date, :created_at, 1)";
+        $stmtInsert = $conn->prepare($insertQuery);
+        
+        $date = date("Y-m-d");
+        $created_at = date("Y-m-d H:i:s");
+
+        $stmtInsert->execute([
+            'distributor_id' => $distributor_id,
+            'salesman_id' => $salesman_id,
+            'customer_id' => $customer_id,
+            'vehicle_id' => $vehicle_id,
+            'shop_id' => $shop_id,
+            'reason' => $reason,
+            'date' => $date,
+            'created_at' => $created_at
+        ]);
 
         // Commit the transaction
         $conn->commit();
 
         // Return a success response
-        return [
-            "status" => "success",
-            "message" => "Ticket raised and customer status updated successfully",
-            "ticket_id" => rand(1000, 9999),
-            "details" => [
-                "customer_id" => $customer_id,
-                "salesman_id" => $salesman_id,
-                "reason" => $reason,
-                "shop_id" => $shop_id,
-                "distributor_id" => $distributor_id,
-                "vehicle_id" => $vehicle_id
-            ]
+        $response = array();
+        $response['ticket_id'] = $conn->lastInsertId();
+        $response['details'] = [
+            "customer_id" => $customer_id,
+            "salesman_id" => $salesman_id,
+            "reason" => $reason,
+            "shop_id" => $shop_id,
+            "distributor_id" => $distributor_id,
+            "vehicle_id" => $vehicle_id
         ];
+
+        return array("success" => "1", "message" => "Ticket raised successfully", "data" => $response);
     } catch (Exception $e) {
         // Rollback the transaction on error
         $conn->rollBack();
@@ -620,13 +633,80 @@ function raiseTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor
         error_log($e->getMessage());
 
         // Return an error response
-        return [
-            "status" => "error",
-            "message" => "Failed to raise ticket and update customer status",
-            "error" => $e->getMessage()
-        ];
+        return array("success" => "0", "message" => "Failed to raise ticket", "error" => $e->getMessage());
     }
 }
+
+
+
+
+
+
+function resetTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor_id, $vehicle_id)
+{
+    global $conn; // Assume $conn is your database connection
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+    try {
+        // Begin a transaction
+        $conn->beginTransaction();
+
+        // Delete ticket record from sma_tickets
+        $deleteTicketQuery = "DELETE FROM sma_tickets WHERE customer_id = :customer_id AND distributor_id = :distributor_id AND salesman_id = :salesman_id AND vehicle_id = :vehicle_id AND shop_id = :shop_id AND reason = :reason";
+        $stmtDeleteTicket = $conn->prepare($deleteTicketQuery);
+        $stmtDeleteTicket->execute([
+            'customer_id' => $customer_id,
+            'distributor_id' => $distributor_id,
+            'salesman_id' => $salesman_id,
+            'vehicle_id' => $vehicle_id,
+            'shop_id' => $shop_id,
+            'reason' => $reason
+        ]);
+
+        // Update customer status to active in sma_customers
+        $updateCustomerQuery = "UPDATE sma_customers SET active = 1 WHERE id = :customer_id";
+        $stmtUpdateCustomer = $conn->prepare($updateCustomerQuery);
+        $stmtUpdateCustomer->execute(['customer_id' => $customer_id]);
+
+        // Commit the transaction
+        $conn->commit();
+
+        // Return a success response
+        $response = [
+            "success" => true,
+            "message" => "Ticket status reset successfully",
+            "data" => [
+                "customer_id" => $customer_id,
+                "salesman_id" => $salesman_id,
+                "reason" => $reason,
+                "shop_id" => $shop_id,
+                "distributor_id" => $distributor_id,
+                "vehicle_id" => $vehicle_id
+            ]
+        ];
+
+        return $response;
+    } catch (Exception $e) {
+        // Rollback the transaction on error
+        $conn->rollBack();
+
+        // Log the error (optional)
+        error_log($e->getMessage());
+
+        // Return an error response
+        $errorResponse = [
+            "success" => false,
+            "message" => "Failed to reset ticket status",
+            "error" => $e->getMessage()
+        ];
+
+        return $errorResponse;
+    }
+}
+
+
+
 
 function makeSale($discount, $invoice, $cheque, $image, $invoice_id, $discount_id, $cheque_id, $json, $customer_id, $distributor_id, $town_id, $salesman_id, $paid_by, $vehicle_id, $payment_status, $shop_id, $total, $payments, $signature) {
     global $conn; // Assume $conn is your PDO database connection
