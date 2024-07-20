@@ -1,6 +1,6 @@
 <?php
 include ("../common/common.php");
-
+date_default_timezone_set('Africa/Nairobi');
 
 function fetchGroups()
 {
@@ -73,170 +73,78 @@ function fetchDistributor()
     return $response;
 }
 
-// function fetchCustomers($vehicle_id, $day, $salesman_id, $page = 1, $limit = 150)
-// {
-//     global $conn;
 
-//     // Set PDO attributes
-//     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-//     $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+function fetchShopIdsForAllocationIds($vehicle_id, $day)
+{
+    global $conn; 
 
-//     try {
-//         // Initialize variables
-//         $current_date = date("Y-m-d") . ' 23:59:00';
-//         $today = date("Y-m-d");
-//         $offset = ($page - 1) * $limit; // Calculate offset for pagination
+   try {
+    // Set PDO attributes
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
-//         // Fetch status of the salesman
-//         $statusQuery = "SELECT status FROM sma_companies WHERE id = :salesman_id";
-//         $stmtStatus = $conn->prepare($statusQuery);
-//         $stmtStatus->bindParam(':salesman_id', $salesman_id, PDO::PARAM_INT);
-//         $stmtStatus->execute();
+    // Query to fetch allocation_ids based on disabled_date
+    $disabled_date = date("Y-m-d") . ' 23:59:00';
+    $allocationIdsQuery = "
+        SELECT allocation_id
+        FROM sma_temporary_alloc_disable
+        WHERE vehicle_id = :vehicle_id
+        AND day_no = :day_no 
+    ";
 
-//         $status = null; // Initialize status variable
-//         if ($stmtStatus->rowCount() > 0) {
-//             $rowStatus = $stmtStatus->fetch(PDO::FETCH_ASSOC);
-//             $status = $rowStatus['status'];
-//         }
+    // Prepare and execute the query to get allocation_ids
+    $stmtAllocationIds = $conn->prepare($allocationIdsQuery);
+    $stmtAllocationIds->bindParam(':vehicle_id', $vehicle_id, PDO::PARAM_INT);
+    $stmtAllocationIds->bindParam(':day_no', $day, PDO::PARAM_INT);
+    $stmtAllocationIds->execute();
 
-//         // Check if status is fetched and continue only if status is found
-//         if ($status === null) {
-//             return array("success" => "0", "message" => "Failed to fetch status");
-//         }
+    // Fetch all allocation_ids into an array
+    $allocationIds = $stmtAllocationIds->fetchAll(PDO::FETCH_COLUMN);
 
-//         // Prepare the SQL query for counting total records
-//         $countQuery = "SELECT COUNT(DISTINCT sma_shops.id) as total
-//             FROM sma_shops
-//             LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
-//             LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
-//             LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
-//             LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
-//             LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
-//             LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
-//             LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
-//             LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
-//             WHERE NOT EXISTS (
-//                 SELECT *
-//                 FROM sma_sales
-//                 WHERE sma_shops.id = sma_sales.shop_id AND sma_sales.date = CURRENT_DATE AND sma_sales.created < :current_date
-//             ) 
-//             AND NOT EXISTS (
-//                 SELECT *
-//                 FROM sma_tickets
-//                 WHERE sma_shops.id = sma_tickets.shop_id AND sma_tickets.date = CURRENT_DATE AND sma_tickets.created_at < :current_date2
-//             ) 
-//             AND sma_allocation_days.id NOT IN (
-//                 SELECT allocation_id
-//                 FROM sma_temporary_alloc_disable
-//                 WHERE disabled_date = :today AND vehicle_id = :vehicle_id1
-//             )
-//             AND sma_vehicles.id = :vehicle_id2 AND sma_customers.active = 1 
-//             AND ((sma_allocation_days.active = 0 AND sma_allocation_days.disabled_date != :today2) OR sma_allocation_days.active = 1) 
-//             AND sma_allocation_days.day = :day1 AND sma_vehicle_route.day = :day2";
+    // Initialize an array to store shop_ids
+    $shopIds = [];
 
-//         $stmtCount = $conn->prepare($countQuery);
-//         $stmtCount->bindParam(':current_date', $current_date);
-//         $stmtCount->bindParam(':current_date2', $current_date);
-//         $stmtCount->bindParam(':today', $today);
-//         $stmtCount->bindParam(':today2', $today);
-//         $stmtCount->bindParam(':vehicle_id1', $vehicle_id, PDO::PARAM_INT);
-//         $stmtCount->bindParam(':vehicle_id2', $vehicle_id, PDO::PARAM_INT);
-//         $stmtCount->bindParam(':day1', $day, PDO::PARAM_STR);
-//         $stmtCount->bindParam(':day2', $day, PDO::PARAM_STR);
-//         $stmtCount->execute();
-//         $totalRecords = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
+    // Loop through each allocation_id and fetch corresponding shop_id
+    foreach ($allocationIds as $allocation_id) {
+        // Query to fetch shop_id for each allocation_id
+        $shopIdQuery = "
+            SELECT sa.shop_id
+            FROM sma_shop_allocations sa
+            INNER JOIN sma_allocation_days ad ON ad.allocation_id = sa.id
+            WHERE ad.id = :allocation_id
+        ";
 
-//         if ($limit === null) {
-//             $limit = $totalRecords;
-//             $offset = 0; // Reset offset to fetch all records
-//         }
+        // Prepare and execute the query with parameter binding
+        $stmtShopId = $conn->prepare($shopIdQuery);
+        $stmtShopId->bindParam(':allocation_id', $allocation_id, PDO::PARAM_INT);
+        $stmtShopId->execute();
 
-//         // Prepare the SQL query for fetching limited records
-//         // Prepare the SQL query for fetching limited records
-// $query = "SELECT sma_customers.id as id, sma_customers.name, sma_customers.phone, sma_customers.active, sma_customers.email, sma_customers.customer_group_id, sma_customers.customer_group_name, sma_shops.image as logo, sma_shops.shop_name, sma_shops.id as shop_id, sma_shops.lat, sma_shops.lng, sma_currencies.french_name as county_name, sma_cities.city as town_name, sma_cities.id as town_id
-// FROM sma_shops
-// LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
-// LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
-// LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
-// LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
-// LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
-// LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
-// LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
-// LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
-// WHERE NOT EXISTS (
-//     SELECT *
-//     FROM sma_sales
-//     WHERE sma_shops.id = sma_sales.shop_id AND sma_sales.date = CURRENT_DATE AND sma_sales.created < :current_date
-// ) 
-// AND NOT EXISTS (
-//     SELECT *
-//     FROM sma_tickets
-//     WHERE sma_shops.id = sma_tickets.shop_id AND sma_tickets.date = CURRENT_DATE AND sma_tickets.created_at < :current_date2
-// ) 
-// AND sma_allocation_days.id NOT IN (
-//     SELECT allocation_id
-//     FROM sma_temporary_alloc_disable
-//     WHERE disabled_date = :today AND vehicle_id = :vehicle_id1
-// )
-// AND sma_vehicles.id = :vehicle_id2 AND sma_customers.active = 1 
-// AND ((sma_allocation_days.active = 0 AND sma_allocation_days.disabled_date != :today2) OR sma_allocation_days.active = 1) 
-// AND sma_allocation_days.day = :day1 AND sma_vehicle_route.day = :day2 
-// GROUP BY sma_shops.id 
-// ORDER BY sma_allocation_days.position ASC";
+        // Fetch and store the shop_id
+        while ($row = $stmtShopId->fetch(PDO::FETCH_ASSOC)) {
+            $shopIds[] = $row['shop_id'];
+        }
+    }
 
-// if ($limit !== null) {
-// // Append LIMIT and OFFSET if $limit is not null
-// $query .= " LIMIT :limit OFFSET :offset";
-// }
-
-// // Bind parameters and execute the query
-// $stmt = $conn->prepare($query);
-// $stmt->bindParam(':current_date', $current_date);
-// $stmt->bindParam(':current_date2', $current_date);
-// $stmt->bindParam(':today', $today);
-// $stmt->bindParam(':today2', $today);
-// $stmt->bindParam(':vehicle_id1', $vehicle_id, PDO::PARAM_INT);
-// $stmt->bindParam(':vehicle_id2', $vehicle_id, PDO::PARAM_INT);
-// $stmt->bindParam(':day1', $day, PDO::PARAM_STR);
-// $stmt->bindParam(':day2', $day, PDO::PARAM_STR);
-// if ($limit !== null) {
-// $stmt->bindParam(':limit', $limit, PDO::PARAM_INT); // Bind the dynamic limit
-// $stmt->bindParam(':offset', $offset, PDO::PARAM_INT); // Bind the dynamic offset
-// }
-// $stmt->execute();
+    // Return the array of shop_ids
+    return ["success" => "1", "message" => "ok", "data" => $shopIds];
 
 
-//         // Fetch the results
-//         $response = array();
-//         if ($stmt->rowCount() > 0) {
-//             if ($status == 1) {
-//                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-//                     $response[] = $row;
-//                 }
-//                 return array("success" => "1", "message" => "ok", "total" => $totalRecords, "data" => $response);
-//             } else {
-//                 return array("success" => "2", "message" => "Account Deactivated", "data" => array());
-//             }
-//         } else {
-//             return array("success" => "1", "message" => "no data available", "data" => array());
-//         }
-//     } catch (Exception $e) {
-//         return array("success" => "0", "message" => "Failed: " . $e->getMessage(), "data" => array());
-//     }
-// }
+    
+     } catch (PDOException $e) {
+    return ["success" => "0", "message" => "Failed: " . $e->getMessage(), "data" => []];
+    }
+
+}
+
 
 function fetchCustomers($vehicle_id, $day, $salesman_id)
 {
     global $conn;
 
-    // Set PDO attributes
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
     try {
-        // Initialize variables
-        $current_date = date("Y-m-d") . ' 23:59:00';
-        $today = date("Y-m-d");
+        // Set PDO attributes
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
         // Fetch status of the salesman
         $statusQuery = "SELECT status FROM sma_companies WHERE id = :salesman_id";
@@ -255,66 +163,94 @@ function fetchCustomers($vehicle_id, $day, $salesman_id)
             return array("success" => "0", "message" => "Failed to fetch status");
         }
 
-        // Prepare the SQL query for fetching records without pagination
-        $query = "SELECT sma_customers.id as id, sma_customers.name, sma_customers.phone, sma_customers.active, sma_customers.email, sma_customers.customer_group_id, sma_customers.customer_group_name, sma_shops.image as logo, sma_shops.shop_name, sma_shops.id as shop_id, sma_shops.lat, sma_shops.lng, sma_currencies.french_name as county_name, sma_cities.city as town_name, sma_cities.id as town_id
-            FROM sma_shops
-            LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
-            LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
-            LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
-            LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
-            LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
-            LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
-            LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
-            LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
-            WHERE NOT EXISTS (
-                SELECT *
-                FROM sma_sales
-                WHERE sma_shops.id = sma_sales.shop_id AND sma_sales.date = CURRENT_DATE AND sma_sales.created < :current_date
-            ) 
-            AND NOT EXISTS (
-                SELECT *
-                FROM sma_tickets
-                WHERE sma_shops.id = sma_tickets.shop_id AND sma_tickets.date = CURRENT_DATE AND sma_tickets.created_at < :current_date2
-            ) 
-            AND sma_allocation_days.id NOT IN (
-                SELECT allocation_id
-                FROM sma_temporary_alloc_disable
-                WHERE disabled_date = :today AND vehicle_id = :vehicle_id1
-            )
-            AND sma_vehicles.id = :vehicle_id2 AND sma_customers.active = 1 
-            AND ((sma_allocation_days.active = 0 AND sma_allocation_days.disabled_date != :today2) OR sma_allocation_days.active = 1) 
-            AND sma_allocation_days.day = :day1 AND sma_vehicle_route.day = :day2 
-            GROUP BY sma_shops.id 
-            ORDER BY sma_allocation_days.position ASC";
+        // Fetch shop IDs to exclude based on allocation disablement
+        $shopIdsResult = fetchShopIdsForAllocationIds($vehicle_id, $day);
+
+        if ($shopIdsResult["success"] !== "1") {
+            // Handle error in fetching shop IDs to exclude
+            return array("success" => "0", "message" => "Failed to fetch shop IDs to exclude", "data" => []);
+        }
+
+        $shopIds = $shopIdsResult["data"];
+        $disabled_date = date("Y-m-d") . ' 23:59:00';
+        $query = "SELECT 
+                    sma_customers.id AS id, 
+                    sma_customers.name, 
+                    sma_customers.phone, 
+                    sma_customers.active, 
+                    sma_customers.email, 
+                    sma_customers.customer_group_id, 
+                    sma_customers.customer_group_name, 
+                    sma_shops.image AS logo, 
+                    sma_shops.shop_name, 
+                    sma_shops.id AS shop_id, 
+                    sma_shops.lat, 
+                    sma_shops.lng, 
+                    sma_currencies.french_name AS county_name, 
+                    sma_cities.city AS town_name, 
+                    sma_cities.id AS town_id
+                FROM 
+                    sma_shops
+                    LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
+                    LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
+                    LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
+                    LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
+                    LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
+                    LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
+                    LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
+                    LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
+                WHERE 
+                    NOT EXISTS (
+                        SELECT 1
+                        FROM sma_sales
+                        WHERE sma_shops.id = sma_sales.shop_id 
+                            AND DATE(sma_sales.date) = CURDATE() 
+                            AND sma_sales.created < :current_date
+                    ) 
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM sma_tickets
+                        WHERE sma_shops.id = sma_tickets.shop_id 
+                            AND DATE(sma_tickets.date) = CURDATE() 
+                            AND sma_tickets.created_at < :current_date2
+                    ) 
+                    
+                    AND sma_vehicles.id = :vehicle_id 
+                    AND sma_customers.active = 1 
+                    AND (
+                        (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
+                        OR sma_allocation_days.active = 1
+                    ) 
+                    AND sma_allocation_days.day = :day 
+                    AND sma_vehicle_route.day = :day2
+                    AND sma_shops.id NOT IN (" . implode(",", $shopIds) . ") 
+                GROUP BY 
+                    sma_shops.id 
+                ORDER BY 
+                    sma_allocation_days.position ASC";
 
         // Bind parameters and execute the query
         $stmt = $conn->prepare($query);
+        $current_date = date("Y-m-d H:i:s");
         $stmt->bindParam(':current_date', $current_date);
         $stmt->bindParam(':current_date2', $current_date);
-        $stmt->bindParam(':today', $today);
-        $stmt->bindParam(':today2', $today);
-        $stmt->bindParam(':vehicle_id1', $vehicle_id, PDO::PARAM_INT);
-        $stmt->bindParam(':vehicle_id2', $vehicle_id, PDO::PARAM_INT);
-        $stmt->bindParam(':day1', $day, PDO::PARAM_STR);
+        $stmt->bindParam(':vehicle_id', $vehicle_id, PDO::PARAM_INT);
+        $stmt->bindParam(':day', $day, PDO::PARAM_STR);
         $stmt->bindParam(':day2', $day, PDO::PARAM_STR);
         $stmt->execute();
 
         // Fetch the results
         $response = array();
         if ($stmt->rowCount() > 0) {
-            if ($status == 1) {
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $response[] = $row;
-                }
-                return array("success" => "1", "message" => "ok", "data" => $response);
-            } else {
-                return array("success" => "2", "message" => "Account Deactivated", "data" => array());
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $response[] = $row;
             }
+            return array("success" => "1", "message" => "ok", "data" => $response);
         } else {
-            return array("success" => "1", "message" => "no data available", "data" => array());
+            return array("success" => "1", "message" => "no data available", "data" => []);
         }
-    } catch (Exception $e) {
-        return array("success" => "0", "message" => "Failed: " . $e->getMessage(), "data" => array());
+    } catch (PDOException $e) {
+        return array("success" => "0", "message" => "Failed: " . $e, "data" => $shopIds);
     }
 }
 
@@ -722,23 +658,23 @@ function makeSale($discount, $invoice, $cheque, $image, $invoice_id, $discount_i
         $paymentDetails = json_decode($payments, true);
 
         // Insert into sales table
-        $query = "INSERT INTO sales (discount, invoice, cheque, image, invoice_id, discount_id, cheque_id, customer_id, distributor_id, town_id, salesman_id, paid_by, vehicle_id, payment_status, shop_id, total, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO sma_sales (gmid,customer_id, distributor_id, salesman_id, vehicle_id, shop_id) VALUES ( '',?, ?, ?, ?,?)";
         $stmt = $conn->prepare($query);
-        $stmt->execute([$discount, $invoice, $cheque, $image, $invoice_id, $discount_id, $cheque_id, $customer_id, $distributor_id, $town_id, $salesman_id, $paid_by, $vehicle_id, $payment_status, $shop_id, $total, $signature]);
+        $stmt->execute([ '', $customer_id, $distributor_id,  $salesman_id, $vehicle_id, $shop_id]);
 
         // Get the last inserted ID
         $sale_id = $conn->lastInsertId();
 
         // Insert sale items
         foreach ($items as $item) {
-            $query = "INSERT INTO sale_items (sale_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
+            $query = "INSERT INTO sma_sale_items (sale_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
             $stmt->execute([$sale_id, $item['product_id'], $item['quantity'], $item['price']]);
         }
 
         // Insert payment details
         foreach ($paymentDetails as $payment) {
-            $query = "INSERT INTO sale_payments (sale_id, payment_method, amount) VALUES (?, ?, ?)";
+            $query = "INSERT INTO sma_payments (sale_id, payment_method, amount) VALUES (?, ?, ?)";
             $stmt = $conn->prepare($query);
             $stmt->execute([$sale_id, $payment['method'], $payment['amount']]);
         }

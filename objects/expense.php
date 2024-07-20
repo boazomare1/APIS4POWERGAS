@@ -10,43 +10,63 @@ class Expenses{
     public function __construct($db){
         $this->conn = $db;
     }
-    public function fetchExpenses($salesman_id){
+    
+    public function fetchExpenses($salesman_id) {
+        // Set PDO error mode to exception and disable emulated prepares
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    
+        // Initialize response array
+        $response = array();
+    
         try {
-            $query = "SELECT id, date, company_id, reference, amount, note, status FROM sma_expenses WHERE salesman_id=? AND date >= DATE(NOW()) - INTERVAL 7 DAY ORDER BY id DESC";
-
+            // Prepare the SQL query with named parameters
+            $query = "SELECT id, date, company_id, reference, amount, note, status 
+                      FROM sma_expenses 
+                      WHERE salesman_id = :salesman_id 
+                      AND date >= DATE(NOW()) - INTERVAL 7 DAY 
+                      ORDER BY id DESC";
+    
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(1, $salesman_id);
+    
+            // Bind the salesman_id parameter
+            $stmt->bindParam(':salesman_id', $salesman_id, PDO::PARAM_INT);
+    
+            // Execute the query
             $stmt->execute();
-            
-
-            $response = array();
-            if($stmt->rowCount()>0){
-                while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-
+    
+            // Log for debugging
+            error_log("Executed query: $query with salesman_id: $salesman_id");
+    
+            // Fetch results
+            if ($stmt->rowCount() > 0) {
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     $response[] = array(
-                        "id"=>$row['id'],
-                        "date"=>$row['date'],
-                        "company_id"=>$row['company_id'],
-                        "reference"=>$row['reference'],
-                        "amount"=>intval($row['amount']),
-                        "approved"=>intval($row['approved']),
-                        "note"=>$row['note'],
-                        "status"=>$row['status']);
+                        "id" => $row['id'],
+                        "date" => $row['date'],
+                        "company_id" => $row['company_id'],
+                        "reference" => $row['reference'],
+                        "amount" => intval($row['amount']),
+                        "note" => $row['note'],
+                        "status" => $row['status']
+                    );
                 }
-
-                return $response;
-            }else{
-                return array();
+            } else {
+                // Log no records found for debugging
+                error_log("No records found for salesman_id: " . $salesman_id);
             }
-
-        } catch (Exception $e) {
-            $response= array("success"=>"0", "message"=>"Failed");
-            print_r($e);
+    
+        } catch (PDOException $e) {
+            // Handle PDO exceptions
+            $response = array("success" => "0", "message" => "Failed: " . $e->getMessage());
+            error_log("PDOException: " . $e->getMessage());
         }
+    
+        // Return response array
         return $response;
-    } 
+    }
+    
+     
     
     public function createExpense($company_id, $vehicle_id, $distributor_id, $salesman_id, $reference, $amount, $note, $created_by, $image){
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
