@@ -173,63 +173,67 @@ function fetchCustomers($vehicle_id, $day, $salesman_id)
 
         $shopIds = $shopIdsResult["data"];
         $disabled_date = date("Y-m-d") . ' 23:59:00';
-        $query = "SELECT 
-                    sma_customers.id AS id, 
-                    sma_customers.name, 
-                    sma_customers.phone, 
-                    sma_customers.active, 
-                    sma_customers.email, 
-                    sma_customers.customer_group_id, 
-                    sma_customers.customer_group_name, 
-                    sma_shops.image AS logo, 
-                    sma_shops.shop_name, 
-                    sma_shops.id AS shop_id, 
-                    sma_shops.lat, 
-                    sma_shops.lng, 
-                    sma_currencies.french_name AS county_name, 
-                    sma_cities.city AS town_name, 
-                    sma_cities.id AS town_id
-                FROM 
-                    sma_shops
-                    LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
-                    LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
-                    LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
-                    LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
-                    LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
-                    LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
-                    LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
-                    LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
-                WHERE 
-                    NOT EXISTS (
-                        SELECT 1
-                        FROM sma_sales
-                        WHERE sma_shops.id = sma_sales.shop_id 
-                            AND DATE(sma_sales.date) = CURDATE() 
-                            AND sma_sales.created < :current_date
-                    ) 
-                    AND NOT EXISTS (
-                        SELECT 1
-                        FROM sma_tickets
-                        WHERE sma_shops.id = sma_tickets.shop_id 
-                            AND DATE(sma_tickets.date) = CURDATE() 
-                            AND sma_tickets.created_at < :current_date2
-                    ) 
-                    
-                    AND sma_vehicles.id = :vehicle_id 
-                    AND sma_customers.active = 1 
-                    AND (
-                        (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
-                        OR sma_allocation_days.active = 1
-                    ) 
-                    AND sma_allocation_days.day = :day 
-                    AND sma_vehicle_route.day = :day2
-                    AND sma_shops.id NOT IN (" . implode(",", $shopIds) . ") 
-                GROUP BY 
-                    sma_shops.id 
-                ORDER BY 
-                    sma_allocation_days.position ASC";
-
-        // Bind parameters and execute the query
+        $query = " SELECT 
+        sma_customers.id AS id, 
+        sma_customers.name, 
+        sma_customers.phone, 
+        sma_customers.active, 
+        sma_customers.email, 
+        sma_customers.customer_group_id, 
+        sma_customers.customer_group_name, 
+        sma_shops.image AS logo, 
+        sma_shops.shop_name, 
+        sma_shops.id AS shop_id, 
+        sma_shops.lat, 
+        sma_shops.lng, 
+        sma_currencies.french_name AS county_name, 
+        sma_cities.city AS town_name, 
+        sma_cities.id AS town_id
+        FROM 
+        sma_shops
+        LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
+        LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
+        LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
+        LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
+        LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
+        LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
+        LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
+        LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
+    WHERE 
+        NOT EXISTS (
+            SELECT 1
+            FROM sma_sales
+            WHERE sma_shops.id = sma_sales.shop_id 
+                AND DATE(sma_sales.date) = CURDATE() 
+                AND sma_sales.created < :current_date
+        ) 
+        AND NOT EXISTS (
+            SELECT 1
+            FROM sma_tickets
+            WHERE sma_shops.id = sma_tickets.shop_id 
+                AND DATE(sma_tickets.date) = CURDATE() 
+                AND sma_tickets.created_at < :current_date2
+        ) 
+         AND NOT EXISTS (
+            SELECT 1
+            FROM sma_discounts
+            WHERE sma_shops.id = sma_discounts.shop_id
+                AND DATE(sma_discounts.date) = CURDATE()
+        )
+        AND sma_vehicles.id = :vehicle_id 
+        AND sma_customers.active = 1 
+        AND (
+            (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
+            OR sma_allocation_days.active = 1
+        ) 
+        AND sma_allocation_days.day = :day 
+        AND sma_vehicle_route.day = :day2
+        AND sma_shops.id NOT IN (" . implode(",", $shopIds) . ") 
+    GROUP BY 
+        sma_shops.id 
+    ORDER BY 
+        sma_allocation_days.position ASC";
+// Bind parameters and execute the query
         $stmt = $conn->prepare($query);
         $current_date = date("Y-m-d H:i:s");
         $stmt->bindParam(':current_date', $current_date);
