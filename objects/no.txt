@@ -1,0 +1,164 @@
+function checkSalesStatus($salesman_id, $vehicle_id, $day)
+{
+    global $conn;
+
+    try {
+        // Fetch shop IDs to exclude based on allocation disablement
+        $shopIdsResult = fetchShopIdsForAllocationIds($vehicle_id, $day);
+        if ($shopIdsResult["success"] !== "1") {
+            return [
+                "success" => "0",
+                "message" => "Failed to fetch shop IDs to exclude",
+                "total_customers" => 0,
+                "actual_sales" => 0,
+                "ticket_sales_count" => 0,
+                "discount_sales_count" => 0,
+                "served_count" => 0,
+                "unserved_count" => 0
+            ];
+        }
+
+        $shopIds = $shopIdsResult["data"];
+
+        // Query the database for customers to be served by the salesman on the given day, excluding disabled shops
+        $query = "
+            SELECT DISTINCT sma_customers.id AS customer_id
+            FROM sma_shops
+            LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
+            LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
+            LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
+            LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
+            LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
+            LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
+            LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
+            LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
+            WHERE 
+                sma_vehicles.id = :vehicle_id 
+                AND sma_customers.active = 1 
+                AND (
+                    (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
+                    OR sma_allocation_days.active = 1
+                ) 
+                AND sma_allocation_days.day = :day 
+                AND sma_vehicle_route.day = :day2
+                AND sma_shops.id NOT IN (" . implode(",", array_map('intval', $shopIds)) . ")";
+
+        // Prepare and execute the query
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':vehicle_id', $vehicle_id, PDO::PARAM_INT);
+        $stmt->bindParam(':day', $day, PDO::PARAM_STR);
+        $stmt->bindParam(':day2', $day, PDO::PARAM_STR);
+        $stmt->execute();
+
+        // Fetch all the customer IDs for today
+        $customerIds = [];
+        if ($stmt->rowCount() > 0) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $customerIds[] = $row['customer_id'];
+            }
+        } else {
+            // No customers found
+            return [
+                "success" => "1",
+                "message" => "No customers found",
+                "total_customers" => 0,
+                "actual_sales" => 0,
+                "ticket_sales_count" => 0,
+                "discount_sales_count" => 0,
+                "served_count" => 0,
+                "unserved_count" => 0
+            ];
+        }
+
+        // Get today's date
+        $today = date('Y-m-d');
+
+        // Prepare and execute the query for actual sales
+        $salesQuery = "SELECT customer_id, COUNT(*) AS sales_count
+            FROM sma_sales
+            WHERE customer_id IN (" . implode(',', array_fill(0, count($customerIds), '?')) . ")
+            AND DATE(date) = ?
+            AND salesman_id = ?
+            GROUP BY customer_id";
+
+        $stmtSales = $conn->prepare($salesQuery);
+        $stmtSales->execute(array_merge($customerIds, [$today, $salesman_id]));
+        $salesResults = $stmtSales->fetchAll(PDO::FETCH_ASSOC);
+
+        // Map actual sales counts
+        $actualSalesCountMap = [];
+        foreach ($salesResults as $row) {
+            $actualSalesCountMap[$row['customer_id']] = $row['sales_count'];
+        }
+
+        // Prepare and execute the query for ticket sales
+        $ticketSalesQuery = "SELECT customer_id, COUNT(*) AS ticket_sales_count
+            FROM sma_ticket_sales
+            WHERE customer_id IN (" . implode(',', array_fill(0, count($customerIds), '?')) . ")
+            AND DATE(date) = ?
+            AND salesman_id = ?
+            GROUP BY customer_id";
+
+        $stmtTicketSales = $conn->prepare($ticketSalesQuery);
+        $stmtTicketSales->execute(array_merge($customerIds, [$today, $salesman_id]));
+        $ticketSalesResults = $stmtTicketSales->fetchAll(PDO::FETCH_ASSOC);
+
+        // Map ticket sales counts
+        $ticketSalesCountMap = [];
+        $ticketSalesCount = 0;
+        foreach ($ticketSalesResults as $row) {
+            $ticketSalesCountMap[$row['customer_id']] = $row['ticket_sales_count'];
+            $ticketSalesCount += $row['ticket_sales_count']; // Aggregate ticket sales count
+        }
+
+        // Prepare and execute the query for discount sales
+        $discountSalesQuery = "SELECT customer_id, COUNT(*) AS discount_sales_count
+            FROM sma_discounts
+            WHERE customer_id IN (" . implode(',', array_fill(0, count($customerIds), '?')) . ")
+            AND DATE(date) = ?
+            AND salesman_id = ?
+            GROUP BY customer_id";
+
+        $stmtDiscountSales = $conn->prepare($discountSalesQuery);
+        $stmtDiscountSales->execute(array_merge($customerIds, [$today, $salesman_id]));
+        $discountSalesResults = $stmtDiscountSales->fetchAll(PDO::FETCH_ASSOC);
+
+        // Map discount sales counts
+        $discountSalesCountMap = [];
+        $discountSalesCount = 0;
+        foreach ($discountSalesResults as $row) {
+            $discountSalesCountMap[$row['customer_id']] = $row['discount_sales_count'];
+            $discountSalesCount += $row['discount_sales_count']; // Aggregate discount sales count
+        }
+
+        // Calculate actual sales and served count
+        $actualSalesCount = count($actualSalesCountMap);
+        $servedCount = $actualSalesCount + $ticketSalesCount + $discountSalesCount;
+
+        // Calculate unserved customers
+        $unservedCount = count($customerIds) - $servedCount;
+
+        // Return the result
+        return [
+            "success" => "1",
+            "message" => "Checked sales status successfully",
+            "total_customers" => count($customerIds),
+            "actual_sales" => $actualSalesCount,
+            "ticket_sales_count" => $ticketSalesCount,
+            "discount_sales_count" => $discountSalesCount,
+            "served_count" => $servedCount,
+            "unserved_count" => $unservedCount
+        ];
+    } catch (PDOException $e) {
+        return [
+            "success" => "0",
+            "message" => "Failed: " . $e->getMessage(),
+            "total_customers" => 0,
+            "actual_sales" => 0,
+            "ticket_sales_count" => 0,
+            "discount_sales_count" => 0,
+            "served_count" => 0,
+            "unserved_count" => 0
+        ];
+    }
+}
