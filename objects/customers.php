@@ -152,45 +152,25 @@ function fetchCustomers($vehicle_id, $day, $salesman_id)
         $stmtStatus->bindParam(':salesman_id', $salesman_id, PDO::PARAM_INT);
         $stmtStatus->execute();
 
-        $status = null; // Initialize status variable
-        if ($stmtStatus->rowCount() > 0) {
-            $rowStatus = $stmtStatus->fetch(PDO::FETCH_ASSOC);
-            $status = $rowStatus['status'];
-        }
+        $status = $stmtStatus->fetchColumn();
 
-        // Check if status is fetched and continue only if status is found
-        if ($status === null) {
-            return array("success" => "0", "message" => "Failed to fetch status");
+        // Check if status is fetched
+        if ($status === false) {
+            return array("success" => "0", "message" => "Failed to fetch status", "total_customers" => 0, "customer_ids" => []);
         }
 
         // Fetch shop IDs to exclude based on allocation disablement
         $shopIdsResult = fetchShopIdsForAllocationIds($vehicle_id, $day);
-
         if ($shopIdsResult["success"] !== "1") {
-            // Handle error in fetching shop IDs to exclude
-            return array("success" => "0", "message" => "Failed to fetch shop IDs to exclude", "data" => []);
+            return array("success" => "0", "message" => "Failed to fetch shop IDs to exclude", "total_customers" => 0, "customer_ids" => []);
         }
 
         $shopIds = $shopIdsResult["data"];
         $disabled_date = date("Y-m-d") . ' 23:59:00';
-        $query = " SELECT 
-        sma_customers.id AS id, 
-        sma_customers.name, 
-        sma_customers.phone, 
-        sma_customers.active, 
-        sma_customers.email, 
-        sma_customers.customer_group_id, 
-        sma_customers.customer_group_name, 
-        sma_shops.image AS logo, 
-        sma_shops.shop_name, 
-        sma_shops.id AS shop_id, 
-        sma_shops.lat, 
-        sma_shops.lng, 
-        sma_currencies.french_name AS county_name, 
-        sma_cities.city AS town_name, 
-        sma_cities.id AS town_id
-        FROM 
-        sma_shops
+
+        // Count query
+        $countQuery = "SELECT COUNT(DISTINCT sma_customers.id) AS total_customers
+        FROM sma_shops
         LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
         LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
         LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
@@ -199,43 +179,113 @@ function fetchCustomers($vehicle_id, $day, $salesman_id)
         LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
         LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
         LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
-    WHERE 
-        NOT EXISTS (
-            SELECT 1
-            FROM sma_sales
-            WHERE sma_shops.id = sma_sales.shop_id 
-                AND DATE(sma_sales.date) = CURDATE() 
-                AND sma_sales.created < :current_date
-        ) 
-        AND NOT EXISTS (
-            SELECT 1
-            FROM sma_tickets
-            WHERE sma_shops.id = sma_tickets.shop_id 
-                AND DATE(sma_tickets.date) = CURDATE() 
-                AND sma_tickets.created_at < :current_date2
-        ) 
-         AND NOT EXISTS (
-            SELECT 1
-            FROM sma_discounts
-            WHERE sma_shops.id = sma_discounts.shop_id
-                AND DATE(sma_discounts.date) = CURDATE()
-        )
-        AND sma_vehicles.id = :vehicle_id 
-        AND sma_customers.active = 1 
-        AND (
-            (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
-            OR sma_allocation_days.active = 1
-        ) 
-        AND sma_allocation_days.day = :day 
-        AND sma_vehicle_route.day = :day2
-        AND sma_shops.id NOT IN (" . implode(",", $shopIds) . ") 
-    GROUP BY 
-        sma_shops.id 
-    ORDER BY 
-        sma_allocation_days.position ASC";
-// Bind parameters and execute the query
-        $stmt = $conn->prepare($query);
+        WHERE 
+            NOT EXISTS (
+                SELECT 1
+                FROM sma_sales
+                WHERE sma_shops.id = sma_sales.shop_id 
+                    AND DATE(sma_sales.date) = CURDATE() 
+                    AND sma_sales.created < :current_date
+            ) 
+            AND NOT EXISTS (
+                SELECT 1
+                FROM sma_tickets
+                WHERE sma_shops.id = sma_tickets.shop_id 
+                    AND DATE(sma_tickets.date) = CURDATE() 
+                    AND sma_tickets.created_at < :current_date2
+            ) 
+            AND NOT EXISTS (
+                SELECT 1
+                FROM sma_discounts
+                WHERE sma_shops.id = sma_discounts.shop_id
+                    AND DATE(sma_discounts.date) = CURDATE()
+            )
+            AND sma_vehicles.id = :vehicle_id 
+            AND sma_customers.active = 1 
+            AND (
+                (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
+                OR sma_allocation_days.active = 1
+            ) 
+            AND sma_allocation_days.day = :day 
+            AND sma_vehicle_route.day = :day2
+            AND sma_shops.id NOT IN (" . implode(",", array_map('intval', $shopIds)) . ")"; // Ensure shop IDs are integers
+
+        // Prepare and execute the count query
+        $stmtCount = $conn->prepare($countQuery);
         $current_date = date("Y-m-d H:i:s");
+        $stmtCount->bindParam(':current_date', $current_date);
+        $stmtCount->bindParam(':current_date2', $current_date);
+        $stmtCount->bindParam(':vehicle_id', $vehicle_id, PDO::PARAM_INT);
+        $stmtCount->bindParam(':day', $day, PDO::PARAM_STR);
+        $stmtCount->bindParam(':day2', $day, PDO::PARAM_STR);
+        $stmtCount->execute();
+
+        $totalCustomers = $stmtCount->fetchColumn() ?: 0;
+
+        // Fetch the actual customer data and their IDs
+        $query = "SELECT 
+            sma_customers.id AS customer_id, 
+            sma_customers.name, 
+            sma_customers.phone, 
+            sma_customers.active, 
+            sma_customers.email, 
+            sma_customers.customer_group_id, 
+            sma_customers.customer_group_name, 
+            sma_shops.image AS logo, 
+            sma_shops.shop_name, 
+            sma_shops.id AS shop_id, 
+            sma_shops.lat, 
+            sma_shops.lng, 
+            sma_currencies.french_name AS county_name, 
+            sma_cities.city AS town_name, 
+            sma_cities.id AS town_id
+        FROM 
+            sma_shops
+        LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
+        LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
+        LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
+        LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
+        LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
+        LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
+        LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
+        LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
+        WHERE 
+            NOT EXISTS (
+                SELECT 1
+                FROM sma_sales
+                WHERE sma_shops.id = sma_sales.shop_id 
+                    AND DATE(sma_sales.date) = CURDATE() 
+                    AND sma_sales.created < :current_date
+            ) 
+            AND NOT EXISTS (
+                SELECT 1
+                FROM sma_tickets
+                WHERE sma_shops.id = sma_tickets.shop_id 
+                    AND DATE(sma_tickets.date) = CURDATE() 
+                    AND sma_tickets.created_at < :current_date2
+            ) 
+            AND NOT EXISTS (
+                SELECT 1
+                FROM sma_discounts
+                WHERE sma_shops.id = sma_discounts.shop_id
+                    AND DATE(sma_discounts.date) = CURDATE()
+            )
+            AND sma_vehicles.id = :vehicle_id 
+            AND sma_customers.active = 1 
+            AND (
+                (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
+                OR sma_allocation_days.active = 1
+            ) 
+            AND sma_allocation_days.day = :day 
+            AND sma_vehicle_route.day = :day2
+            AND sma_shops.id NOT IN (" . implode(",", array_map('intval', $shopIds)) . ") 
+        GROUP BY 
+            sma_shops.id 
+        ORDER BY 
+            sma_allocation_days.position ASC";
+
+        // Bind parameters and execute the query
+        $stmt = $conn->prepare($query);
         $stmt->bindParam(':current_date', $current_date);
         $stmt->bindParam(':current_date2', $current_date);
         $stmt->bindParam(':vehicle_id', $vehicle_id, PDO::PARAM_INT);
@@ -245,18 +295,123 @@ function fetchCustomers($vehicle_id, $day, $salesman_id)
 
         // Fetch the results
         $response = array();
+        $customerIds = []; // Initialize array to store customer IDs
         if ($stmt->rowCount() > 0) {
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $response[] = $row;
+                $customerIds[] = $row['customer_id']; // Collect customer IDs
             }
-            return array("success" => "1", "message" => "ok", "data" => $response);
+            return array("success" => "1", "message" => "ok", 
+            "total_customers" => $totalCustomers, 
+            "customer_ids" => $customerIds, 
+            "data" => $response);
         } else {
-            return array("success" => "1", "message" => "no data available", "data" => []);
+            return array("success" => "1", "message" => "no data available", "total_customers" => $totalCustomers, "customer_ids" => $customerIds, "data" => []);
         }
     } catch (PDOException $e) {
-        return array("success" => "0", "message" => "Failed: " . $e, "data" => $shopIds);
+        return array("success" => "0", "message" => "Failed: " . $e->getMessage(), "total_customers" => 0, "customer_ids" => [], "data" => []);
     }
 }
+
+function checkSalesStatus($salesman_id, $vehicle_id, $day)
+{
+    global $conn;
+
+    try {
+        // Fetch customers based on salesman_id and day
+        $customersResponse = fetchCustomers($vehicle_id, $day, $salesman_id);
+
+        // Initialize counts
+        $servedCount = 0;
+        $ticketSalesCount = 0;
+        
+        // Check if customers were fetched successfully
+        if ($customersResponse['success'] == "1" && !empty($customersResponse['customer_ids'])) {
+            $customerIds = $customersResponse['customer_ids'];
+
+            // Get today's date in yyyymmdd format
+            // $today = date('Ymd');
+            $today="2024-01-13";
+            
+            // Prepare statement for sales
+            $salesQuery = "SELECT customer_id, COUNT(*) AS sales_count
+                FROM sma_sales
+                WHERE customer_id IN (" . implode(',', array_fill(0, count($customerIds), '?')) . ")
+                AND DATE(date) = ?
+                AND salesman_id = ?
+                GROUP BY customer_id";
+
+            $stmtSales = $conn->prepare($salesQuery);
+            $stmtSales->execute(array_merge($customerIds, [$today, $salesman_id]));
+            $salesResults = $stmtSales->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Create a map for sales counts
+            $salesCountMap = [];
+            foreach ($salesResults as $row) {
+                $salesCountMap[$row['customer_id']] = $row['sales_count'];
+            }
+
+            // Prepare statement for ticket sales
+            $ticketSalesQuery = "SELECT customer_id, COUNT(*) AS ticket_sales_count
+                FROM sma_ticket_sales
+                WHERE customer_id IN (" . implode(',', array_fill(0, count($customerIds), '?')) . ")
+                AND DATE(date) = ?
+                AND salesman_id = ?
+                GROUP BY customer_id";
+
+            $stmtTicketSales = $conn->prepare($ticketSalesQuery);
+            $stmtTicketSales->execute(array_merge($customerIds, [$today, $salesman_id]));
+            $ticketSalesResults = $stmtTicketSales->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Create a map for ticket sales counts
+            $ticketSalesCountMap = [];
+            foreach ($ticketSalesResults as $row) {
+                $ticketSalesCountMap[$row['customer_id']] = $row['ticket_sales_count'];
+                $ticketSalesCount += $row['ticket_sales_count']; // Aggregate ticket sales count
+            }
+
+            // Count served customers
+            foreach ($customerIds as $customer_id) {
+                if (isset($salesCountMap[$customer_id]) && $salesCountMap[$customer_id] > 0) {
+                    $servedCount++;
+                }
+            }
+
+            // Calculate unserved count
+            $unservedCount = count($customerIds) - ($servedCount + $ticketSalesCount);
+        } else {
+            // No customers found
+            return [
+                "success" => "1",
+                "message" => "No customers found",
+                "total_customers" => 0,
+                "served_count" => 0,
+                "ticket_sales_count" => 0,
+                "unserved_count" => 0
+            ];
+        }
+
+        // Return the results
+        return [
+            "success" => "1",
+            "message" => "Checked sales status successfully",
+            "total_customers" => count($customerIds),
+            "served_count" => $servedCount,
+            "ticket_sales_count" => $ticketSalesCount,
+            "unserved_count" => $unservedCount
+        ];
+    } catch (PDOException $e) {
+        return [
+            "success" => "0",
+            "message" => "Failed: " . $e->getMessage(),
+            "total_customers" => 0,
+            "served_count" => 0,
+            "ticket_sales_count" => 0,
+            "unserved_count" => 0
+        ];
+    }
+}
+
 
 function registerCustomer($group_id, $group_name, $name, $country, $email, $phone, $logo, $lat, $lng, $town_id, $shop_name, $route_id, $distributor_id, $salesman_id, $phone_2)
 {
