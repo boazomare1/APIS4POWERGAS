@@ -3,10 +3,10 @@ class Database{
   
     // specify your own database credentials
     private $host = "127.0.0.1";
-    private $db_name = "techsava_powergas";
+    private $db_name = "powergas";
     private $username = "root";
     private $password = "";
-    private $port = "3300";
+    private $port = "3306";
     public $conn;
   
     // get the database connection

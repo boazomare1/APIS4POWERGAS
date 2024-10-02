@@ -34,6 +34,30 @@ if($action == "fetch_customers"){
     echo json_encode($response);
     
 }
+if ($action == "check_sales_status") {
+    $salesmanId = isset($_GET['salesman_id']) ? intval($_GET['salesman_id']) : null;
+    $vehicleId = isset($_GET['vehicle_id']) ? intval($_GET['vehicle_id']) : null;
+    $day = isset($_GET['day']) ? $_GET['day'] : null;
+
+    // Validate the input parameters
+    if ($salesmanId === null || $vehicleId === null || $day === null) {
+        echo json_encode(array(
+            "success" => "0", 
+            "message" => "Missing required parameters", 
+            "total_customers" => 0, 
+            "served_count" => 0, 
+            "ticket_sales_count" => 0, 
+            "unserved_count" => 0
+        ));
+        exit;
+    }
+
+    // Call the function to check sales status
+    $response = checkSalesStatus($salesmanId, $vehicleId, $day);
+    echo json_encode($response);
+}
+
+
 
 if ($action == "raise_ticket") {
     $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : 0;
