@@ -5,7 +5,7 @@ class Database{
     private $host = "127.0.0.1";
     private $db_name = "techsava_powergas";
     private $username = "root";
-    private $password = "";
+    private $password = "Abutwalib12@#";
     private $port = "3306";
     public $conn;
   

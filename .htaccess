@@ -11,4 +11,5 @@ RewriteRule ^sales sales/salesEndpoint.php
 RewriteRule ^register authentication/registerEndpoint.php
 RewriteRule ^customers customers/customersEndpoint.php
 RewriteRule ^expenses expense/expenseEndpoint.php
+RewriteRule ^dormancy dormancy/dormancyEndpoint.php
 </IfModule>

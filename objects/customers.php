@@ -576,7 +576,7 @@ function addCustomerToAccount($name, $customer_id, $town_id)
     curl_setopt_array(
         $curl,
         array(
-            CURLOPT_URL => "https://powergaserp.techsavanna.technology/api/endpoints/customers.php?action=add-customer&company-id=KAMP",
+            CURLOPT_URL => "http://powergas.techsavanna.co.ke:8184/powergaserp/api/endpoints/customers.php?action=add-customer&company-id=KAMP",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
