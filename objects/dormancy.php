@@ -347,8 +347,7 @@ function getDormantCustomers($period = 'month', $tier = null, $fault_type = null
                 c.name as customer_name,
                 c.phone,
                 c.email,
-                c.created_at as customer_created_at,
-                c.created_on as customer_created_on
+                c.created_at as customer_created_at
             FROM sma_customers c
             WHERE c.active = 1
             AND NOT EXISTS (
@@ -425,7 +424,6 @@ function getCustomerDormancyDetail($customer_id) {
                 c.customer_group_name,
                 c.active,
                 c.created_at as customer_created_at,
-                c.created_on as customer_created_on,
                 sh.id as shop_id,
                 sh.shop_name,
                 sh.lat,
