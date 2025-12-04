@@ -167,65 +167,146 @@ switch ($action) {
      * Returns the tier definitions (for reference)
      */
     case 'dormancy_tiers':
-        echo json_encode([
+        echo json_encode(array(
             'success' => '1',
-            'tiers' => [
-                'critical' => [
+            'tiers' => array(
+                'critical' => array(
                     'code' => 'critical',
                     'label' => 'Critical',
                     'min_days' => TIER_CRITICAL,
                     'max_days' => TIER_WARNING - 1,
                     'description' => 'Not served for 7-29 days',
                     'color' => '#dc3545'
-                ],
-                'warning' => [
+                ),
+                'warning' => array(
                     'code' => 'warning',
                     'label' => 'Warning',
                     'min_days' => TIER_WARNING,
                     'max_days' => TIER_AT_RISK - 1,
                     'description' => 'Not served for 30-89 days',
                     'color' => '#fd7e14'
-                ],
-                'at_risk' => [
+                ),
+                'at_risk' => array(
                     'code' => 'at_risk',
                     'label' => 'At Risk',
                     'min_days' => TIER_AT_RISK,
                     'max_days' => TIER_LOST - 1,
                     'description' => 'Not served for 90-364 days',
                     'color' => '#ffc107'
-                ],
-                'lost' => [
+                ),
+                'lost' => array(
                     'code' => 'lost',
                     'label' => 'Lost',
                     'min_days' => TIER_LOST,
                     'max_days' => null,
                     'description' => 'Not served for 365+ days',
                     'color' => '#343a40'
-                ]
-            ],
-            'fault_types' => [
+                )
+            ),
+            'fault_types' => array(
                 'customer' => 'Customer-related issues (closed, unavailable, refused)',
                 'salesman' => 'Salesman skipped without explanation',
                 'external' => 'External factors (stock, weather, vehicle)',
                 'unknown' => 'Cannot determine cause'
-            ]
-        ]);
+            ),
+            'customer_statuses' => array(
+                'NEVER_SERVED' => 'No sales, no tickets - completely ignored',
+                'MORE_TICKETS_THAN_SALES' => 'Problem customer - visited but rarely buys',
+                'SALES_ONLY' => 'Good customer - always buys when visited',
+                'NORMAL' => 'Mix of sales and tickets'
+            )
+        ));
+        break;
+    
+    /**
+     * GET ?action=never_served_customers
+     * Returns customers who have NEVER been served (no sales AND no tickets)
+     * 
+     * Parameters:
+     * - page: pagination page (default: 1)
+     * - limit: results per page (default: 50)
+     */
+    case 'never_served_customers':
+        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+        $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 50;
+        $response = getNeverServedCustomers($page, $limit);
+        echo json_encode($response);
+        break;
+    
+    /**
+     * GET ?action=problematic_customers
+     * Returns customers with more tickets than sales
+     * 
+     * Parameters:
+     * - page: pagination page (default: 1)
+     * - limit: results per page (default: 50)
+     */
+    case 'problematic_customers':
+        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+        $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 50;
+        $response = getProblematicCustomers($page, $limit);
+        echo json_encode($response);
+        break;
+    
+    /**
+     * GET ?action=customer_tickets
+     * Returns ticket history for a specific customer
+     * 
+     * Parameters:
+     * - customer_id: (required) customer ID
+     * - page: pagination page (default: 1)
+     * - limit: results per page (default: 50)
+     */
+    case 'customer_tickets':
+        $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : null;
+        
+        if (!$customer_id) {
+            http_response_code(400);
+            echo json_encode(array('success' => '0', 'message' => 'customer_id is required'));
+            exit;
+        }
+        
+        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+        $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 50;
+        $response = getCustomerTickets($customer_id, $page, $limit);
+        echo json_encode($response);
+        break;
+    
+    /**
+     * GET ?action=customer_service_summary
+     * Returns all customers with service status classification
+     * 
+     * Parameters:
+     * - status: filter by status (NEVER_SERVED, MORE_TICKETS_THAN_SALES, SALES_ONLY, NORMAL)
+     * - page: pagination page (default: 1)
+     * - limit: results per page (default: 50)
+     */
+    case 'customer_service_summary':
+        $status_filter = isset($_GET['status']) ? $_GET['status'] : null;
+        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+        $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 50;
+        $response = getCustomerServiceSummary($page, $limit, $status_filter);
+        echo json_encode($response);
         break;
     
     default:
         http_response_code(400);
-        echo json_encode([
+        echo json_encode(array(
             'success' => '0',
             'message' => 'Invalid action: ' . $action,
-            'available_actions' => [
+            'available_actions' => array(
                 'dormancy_summary',
                 'dormancy_by_salesman', 
                 'dormant_customers',
                 'customer_dormancy_detail',
                 'export_dormancy',
-                'dormancy_tiers'
-            ]
-        ]);
+                'dormancy_tiers',
+                'never_served_customers',
+                'problematic_customers',
+                'customer_tickets',
+                'customer_service_summary'
+            )
+        ));
         break;
 }
 

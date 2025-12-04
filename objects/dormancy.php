@@ -678,4 +678,375 @@ function exportDormancyCSV($period = 'month', $start_date = null, $end_date = nu
     );
 }
 
+/**
+ * Get customers who have NEVER been served (no sales AND no tickets)
+ */
+function getNeverServedCustomers($page = 1, $limit = 50) {
+    global $conn;
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    try {
+        $offset = ($page - 1) * $limit;
+        
+        // Customers with NO sales and NO tickets ever
+        $query = "
+            SELECT 
+                c.id as customer_id,
+                c.name as customer_name,
+                c.phone,
+                c.email,
+                c.created_at as customer_created_at,
+                DATEDIFF(CURDATE(), c.created_at) as days_since_created
+            FROM sma_customers c
+            WHERE c.active = 1
+            AND NOT EXISTS (SELECT 1 FROM sma_sales s WHERE s.customer_id = c.id)
+            AND NOT EXISTS (SELECT 1 FROM sma_tickets t WHERE t.customer_id = c.id)
+            ORDER BY c.created_at ASC
+            LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+        
+        $stmt = $conn->query($query);
+        $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Get total count
+        $countQuery = "
+            SELECT COUNT(*) as total
+            FROM sma_customers c
+            WHERE c.active = 1
+            AND NOT EXISTS (SELECT 1 FROM sma_sales s WHERE s.customer_id = c.id)
+            AND NOT EXISTS (SELECT 1 FROM sma_tickets t WHERE t.customer_id = c.id)
+        ";
+        $stmt = $conn->query($countQuery);
+        $count_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $total = isset($count_result['total']) ? (int)$count_result['total'] : 0;
+        
+        return array(
+            'success' => '1',
+            'description' => 'Customers who have NEVER been served (no sales, no tickets)',
+            'pagination' => array(
+                'page' => (int)$page,
+                'limit' => (int)$limit,
+                'total' => $total,
+                'pages' => $limit > 0 ? ceil($total / $limit) : 0
+            ),
+            'data' => $customers
+        );
+        
+    } catch (Exception $e) {
+        error_log("getNeverServedCustomers error: " . $e->getMessage());
+        return array('success' => '0', 'message' => 'Error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Get problematic customers (more tickets than sales)
+ */
+function getProblematicCustomers($page = 1, $limit = 50) {
+    global $conn;
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    try {
+        $offset = ($page - 1) * $limit;
+        
+        $query = "
+            SELECT 
+                c.id as customer_id,
+                c.name as customer_name,
+                c.phone,
+                c.email,
+                c.created_at as customer_created_at,
+                COALESCE(sales.cnt, 0) as sales_count,
+                COALESCE(tickets.cnt, 0) as tickets_count,
+                COALESCE(tickets.cnt, 0) - COALESCE(sales.cnt, 0) as ticket_surplus
+            FROM sma_customers c
+            LEFT JOIN (
+                SELECT customer_id, COUNT(*) as cnt 
+                FROM sma_sales 
+                GROUP BY customer_id
+            ) sales ON c.id = sales.customer_id
+            LEFT JOIN (
+                SELECT customer_id, COUNT(*) as cnt 
+                FROM sma_tickets 
+                GROUP BY customer_id
+            ) tickets ON c.id = tickets.customer_id
+            WHERE c.active = 1
+            AND COALESCE(tickets.cnt, 0) > COALESCE(sales.cnt, 0)
+            ORDER BY ticket_surplus DESC
+            LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+        
+        $stmt = $conn->query($query);
+        $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Get total count
+        $countQuery = "
+            SELECT COUNT(*) as total FROM (
+                SELECT c.id
+                FROM sma_customers c
+                LEFT JOIN (
+                    SELECT customer_id, COUNT(*) as cnt 
+                    FROM sma_sales 
+                    GROUP BY customer_id
+                ) sales ON c.id = sales.customer_id
+                LEFT JOIN (
+                    SELECT customer_id, COUNT(*) as cnt 
+                    FROM sma_tickets 
+                    GROUP BY customer_id
+                ) tickets ON c.id = tickets.customer_id
+                WHERE c.active = 1
+                AND COALESCE(tickets.cnt, 0) > COALESCE(sales.cnt, 0)
+            ) as cnt
+        ";
+        $stmt = $conn->query($countQuery);
+        $count_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $total = isset($count_result['total']) ? (int)$count_result['total'] : 0;
+        
+        return array(
+            'success' => '1',
+            'description' => 'Customers with more tickets than sales (problematic pattern)',
+            'pagination' => array(
+                'page' => (int)$page,
+                'limit' => (int)$limit,
+                'total' => $total,
+                'pages' => $limit > 0 ? ceil($total / $limit) : 0
+            ),
+            'data' => $customers
+        );
+        
+    } catch (Exception $e) {
+        error_log("getProblematicCustomers error: " . $e->getMessage());
+        return array('success' => '0', 'message' => 'Error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Get ticket history for a specific customer
+ */
+function getCustomerTickets($customer_id, $page = 1, $limit = 50) {
+    global $conn;
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    try {
+        $offset = ($page - 1) * $limit;
+        
+        // Get customer info
+        $customerQuery = "SELECT id, name, phone, email, created_at FROM sma_customers WHERE id = :customer_id";
+        $stmt = $conn->prepare($customerQuery);
+        $stmt->execute(array('customer_id' => $customer_id));
+        $customer = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$customer) {
+            return array('success' => '0', 'message' => 'Customer not found');
+        }
+        
+        // Get tickets with salesman info
+        $query = "
+            SELECT 
+                t.id as ticket_id,
+                t.date,
+                t.created_at,
+                t.reason,
+                t.status,
+                t.salesman_id,
+                CONCAT(u.first_name, ' ', u.last_name) as salesman_name,
+                t.vehicle_id,
+                v.plate_no
+            FROM sma_tickets t
+            LEFT JOIN sma_companies co ON t.salesman_id = co.id
+            LEFT JOIN sma_users u ON co.id = u.company_id
+            LEFT JOIN sma_vehicles v ON t.vehicle_id = v.id
+            WHERE t.customer_id = :customer_id
+            ORDER BY t.date DESC, t.created_at DESC
+            LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+        
+        $stmt = $conn->prepare($query);
+        $stmt->execute(array('customer_id' => $customer_id));
+        $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Get total tickets count
+        $countQuery = "SELECT COUNT(*) as total FROM sma_tickets WHERE customer_id = :customer_id";
+        $stmt = $conn->prepare($countQuery);
+        $stmt->execute(array('customer_id' => $customer_id));
+        $count_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $total_tickets = isset($count_result['total']) ? (int)$count_result['total'] : 0;
+        
+        // Get total sales count for comparison
+        $salesCountQuery = "SELECT COUNT(*) as total FROM sma_sales WHERE customer_id = :customer_id";
+        $stmt = $conn->prepare($salesCountQuery);
+        $stmt->execute(array('customer_id' => $customer_id));
+        $sales_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $total_sales = isset($sales_result['total']) ? (int)$sales_result['total'] : 0;
+        
+        // Ticket status summary
+        $statusQuery = "
+            SELECT status, COUNT(*) as count 
+            FROM sma_tickets 
+            WHERE customer_id = :customer_id 
+            GROUP BY status
+        ";
+        $stmt = $conn->prepare($statusQuery);
+        $stmt->execute(array('customer_id' => $customer_id));
+        $status_breakdown = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Reason summary
+        $reasonQuery = "
+            SELECT reason, COUNT(*) as count 
+            FROM sma_tickets 
+            WHERE customer_id = :customer_id 
+            GROUP BY reason
+            ORDER BY count DESC
+            LIMIT 10
+        ";
+        $stmt = $conn->prepare($reasonQuery);
+        $stmt->execute(array('customer_id' => $customer_id));
+        $reason_breakdown = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return array(
+            'success' => '1',
+            'customer' => $customer,
+            'summary' => array(
+                'total_tickets' => $total_tickets,
+                'total_sales' => $total_sales,
+                'ticket_to_sales_ratio' => $total_sales > 0 ? round($total_tickets / $total_sales, 2) : ($total_tickets > 0 ? 'Infinite' : 0),
+                'is_problematic' => $total_tickets > $total_sales
+            ),
+            'status_breakdown' => $status_breakdown,
+            'reason_breakdown' => $reason_breakdown,
+            'pagination' => array(
+                'page' => (int)$page,
+                'limit' => (int)$limit,
+                'total' => $total_tickets,
+                'pages' => $limit > 0 ? ceil($total_tickets / $limit) : 0
+            ),
+            'tickets' => $tickets
+        );
+        
+    } catch (Exception $e) {
+        error_log("getCustomerTickets error: " . $e->getMessage());
+        return array('success' => '0', 'message' => 'Error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Get customer service summary with status classification
+ */
+function getCustomerServiceSummary($page = 1, $limit = 50, $status_filter = null) {
+    global $conn;
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    try {
+        $offset = ($page - 1) * $limit;
+        
+        $query = "
+            SELECT 
+                c.id as customer_id,
+                c.name as customer_name,
+                c.phone,
+                c.email,
+                c.created_at as customer_created_at,
+                COALESCE(sales.cnt, 0) as total_sales,
+                COALESCE(tickets.cnt, 0) as total_tickets,
+                COALESCE(sales.cnt, 0) + COALESCE(tickets.cnt, 0) as total_interactions,
+                COALESCE(sales.last_date, NULL) as last_sale_date,
+                COALESCE(tickets.last_date, NULL) as last_ticket_date,
+                CASE 
+                    WHEN COALESCE(sales.cnt, 0) = 0 AND COALESCE(tickets.cnt, 0) = 0 THEN 'NEVER_SERVED'
+                    WHEN COALESCE(tickets.cnt, 0) > COALESCE(sales.cnt, 0) THEN 'MORE_TICKETS_THAN_SALES'
+                    WHEN COALESCE(sales.cnt, 0) > 0 AND COALESCE(tickets.cnt, 0) = 0 THEN 'SALES_ONLY'
+                    ELSE 'NORMAL'
+                END as customer_status
+            FROM sma_customers c
+            LEFT JOIN (
+                SELECT customer_id, COUNT(*) as cnt, MAX(date) as last_date
+                FROM sma_sales 
+                GROUP BY customer_id
+            ) sales ON c.id = sales.customer_id
+            LEFT JOIN (
+                SELECT customer_id, COUNT(*) as cnt, MAX(date) as last_date
+                FROM sma_tickets 
+                GROUP BY customer_id
+            ) tickets ON c.id = tickets.customer_id
+            WHERE c.active = 1
+        ";
+        
+        // Apply status filter if provided
+        if ($status_filter) {
+            switch ($status_filter) {
+                case 'NEVER_SERVED':
+                    $query .= " HAVING customer_status = 'NEVER_SERVED'";
+                    break;
+                case 'MORE_TICKETS_THAN_SALES':
+                    $query .= " HAVING customer_status = 'MORE_TICKETS_THAN_SALES'";
+                    break;
+                case 'SALES_ONLY':
+                    $query .= " HAVING customer_status = 'SALES_ONLY'";
+                    break;
+                case 'NORMAL':
+                    $query .= " HAVING customer_status = 'NORMAL'";
+                    break;
+            }
+        }
+        
+        $query .= " ORDER BY total_interactions ASC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+        
+        $stmt = $conn->query($query);
+        $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Get counts per status
+        $statusCountQuery = "
+            SELECT 
+                customer_status,
+                COUNT(*) as count
+            FROM (
+                SELECT 
+                    c.id,
+                    CASE 
+                        WHEN COALESCE(sales.cnt, 0) = 0 AND COALESCE(tickets.cnt, 0) = 0 THEN 'NEVER_SERVED'
+                        WHEN COALESCE(tickets.cnt, 0) > COALESCE(sales.cnt, 0) THEN 'MORE_TICKETS_THAN_SALES'
+                        WHEN COALESCE(sales.cnt, 0) > 0 AND COALESCE(tickets.cnt, 0) = 0 THEN 'SALES_ONLY'
+                        ELSE 'NORMAL'
+                    END as customer_status
+                FROM sma_customers c
+                LEFT JOIN (
+                    SELECT customer_id, COUNT(*) as cnt FROM sma_sales GROUP BY customer_id
+                ) sales ON c.id = sales.customer_id
+                LEFT JOIN (
+                    SELECT customer_id, COUNT(*) as cnt FROM sma_tickets GROUP BY customer_id
+                ) tickets ON c.id = tickets.customer_id
+                WHERE c.active = 1
+            ) as status_data
+            GROUP BY customer_status
+        ";
+        $stmt = $conn->query($statusCountQuery);
+        $status_counts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $status_summary = array(
+            'NEVER_SERVED' => 0,
+            'MORE_TICKETS_THAN_SALES' => 0,
+            'SALES_ONLY' => 0,
+            'NORMAL' => 0
+        );
+        $total = 0;
+        foreach ($status_counts as $row) {
+            $status_summary[$row['customer_status']] = (int)$row['count'];
+            $total += (int)$row['count'];
+        }
+        
+        return array(
+            'success' => '1',
+            'status_filter' => $status_filter,
+            'status_summary' => $status_summary,
+            'pagination' => array(
+                'page' => (int)$page,
+                'limit' => (int)$limit,
+                'total' => $total,
+                'pages' => $limit > 0 ? ceil($total / $limit) : 0
+            ),
+            'data' => $customers
+        );
+        
+    } catch (Exception $e) {
+        error_log("getCustomerServiceSummary error: " . $e->getMessage());
+        return array('success' => '0', 'message' => 'Error: ' . $e->getMessage());
+    }
+}
+
 ?>
