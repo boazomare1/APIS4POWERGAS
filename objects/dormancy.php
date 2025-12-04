@@ -346,7 +346,9 @@ function getDormantCustomers($period = 'month', $tier = null, $fault_type = null
                 c.id as customer_id,
                 c.name as customer_name,
                 c.phone,
-                c.email
+                c.email,
+                c.created_at as customer_created_at,
+                c.created_on as customer_created_on
             FROM sma_customers c
             WHERE c.active = 1
             AND NOT EXISTS (
@@ -413,7 +415,7 @@ function getCustomerDormancyDetail($customer_id) {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     try {
-        // Get customer basic info
+        // Get customer basic info including creation date
         $customerQuery = "
             SELECT 
                 c.id as customer_id,
@@ -422,6 +424,8 @@ function getCustomerDormancyDetail($customer_id) {
                 c.email,
                 c.customer_group_name,
                 c.active,
+                c.created_at as customer_created_at,
+                c.created_on as customer_created_on,
                 sh.id as shop_id,
                 sh.shop_name,
                 sh.lat,
