@@ -17,10 +17,11 @@ $login = new Login($conn);
 $email = isset($_GET['email']) ? $_GET['email'] : die();
 $password = isset($_GET['password']) ? $_GET['password'] : die();
 $action = isset($_GET['action']) ? $_GET['action'] : die();
+$app_version = isset($_GET['app_version']) ? $_GET['app_version'] : null;
 
 if($action == "login_user"){
     //echo password_hash($password, PASSWORD_BCRYPT);
-    $response = $login->loginUser($email, $password);
+    $response = $login->loginUser($email, $password, $app_version);
     echo json_encode($response);
 }
 

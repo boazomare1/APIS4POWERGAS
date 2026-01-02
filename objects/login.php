@@ -9,8 +9,39 @@ class Login
         $this->conn = $db;
     }
 
-    public function loginUser($email, $password)
+    public function loginUser($email, $password, $app_version = null)
     {
+        // BLOCK OLD APPS - Check if app_version is provided
+        if ($app_version === null || $app_version === '' || $app_version === 'unknown') {
+            return array(
+                "success" => "0", 
+                "message" => "App update required. Please contact your administrator for the latest version.",
+                "update_required" => true,
+                "contact_admin" => true
+            );
+        }
+
+        // BLOCK SPECIFIC OLD VERSIONS
+        $blocked_versions = ['1.0.0', '1.1.0', '1.2.0', '1.3.0','1.4.0','1.4.1','1.4.2','1.4.3'];
+        if (in_array($app_version, $blocked_versions)) {
+            return array(
+                "success" => "0", 
+                "message" => "This version is no longer supported. Please contact your administrator for the latest version.",
+                "update_required" => true,
+                "contact_admin" => true
+            );
+        }
+
+        // BLOCK VERSIONS BELOW MINIMUM
+        $minimum_version = '1.4.4';
+        if (version_compare($app_version, $minimum_version, '<')) {
+            return array(
+                "success" => "0", 
+                "message" => "App update required. Please contact your administrator for version 1.4.0 or higher.",
+                "update_required" => true,
+                "contact_admin" => true
+            );
+        }
 
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -47,7 +78,7 @@ class Login
                                    LEFT JOIN sma_companies c ON s.company_id = c.id 
                                    LEFT JOIN sma_vehicles v ON c.vehicle_id = v.id 
                                    LEFT JOIN sma_routes r ON v.plate_no = r.name 
-                                   WHERE s.email = ?";
+WHERE s.email = ?";
 
                         $stmt2 = $this->conn->prepare($query2);
                         $stmt2->bindParam(1, $email);
@@ -73,7 +104,7 @@ class Login
                                 "discount_enabled" => '',
                                 "route_id" => '',
                                 "group_id" => '',
-                                "distributor_id" => '',
+                                 "distributor_id" => '',
                                 "name" => ''
                             ));
                         }
@@ -98,3 +129,4 @@ class Login
     }
 
 }
+
