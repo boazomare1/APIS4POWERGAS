@@ -1,70 +1,78 @@
 <?php
 require '../config/database.php';
-// Step 1: set your API_KEY from https://mywebhost.com/sms-api/info
  
  $customer_phone = isset($_GET['customer_phone']) ? $_GET['customer_phone']  : fieldRequired('customer_phone');
  $user_id = isset($_GET['user_id']) ? $_GET['user_id']  : fieldRequired('user_id');
  $customer_id = isset($_GET['customer_id']) ? $_GET['customer_id']  : fieldRequired('customer_id');
 
-$api_key = 'UG93ZXJHYXM6cG93ZXJnYXMwMDE=';
+// Onfon Media SMS API credentials
+$api_key = 'jJtqOshLAUu13Qxv6W4aBoGT5D8RXpM097mKirVHPzFdgkI2';
+$client_id = 'benson';
+$access_key = 'benson';
+$sender_id = 'Power_Gas';
 
 $database = new Database();
 $conn = $database->getConnection();
 
-// Step 2: Change the from number below. It can be a valid phone number or a String
-$from = 'POWER_GAS';
-
+// Generate 4-digit verification code
 $pin = mt_rand(1000, 9999);
 
-// Step 3: the number we are sending to - Any phone number. You must have to insert country code at beginning of the number
+// Format phone number with country code (254 for Kenya)
 $destination = "254".ltrim($customer_phone, '0');
 
-// Step 4: Replace your Install URL like https://mywebhost.com/sms/api with https://portal.paylifesms.com/sms/api is mandatory.
+// SMS message body
+$sms_text = 'Your verification code is '.$pin.'. Note the code expires within 10 minutes.';
 
-$url = 'https://portal.paylifesms.com/sms/api';
+// Onfon Media API endpoint
+$url = 'https://api.onfonmedia.co.ke/v1/sms/SendBulkSMS';
 
-// the sms body
-$sms = 'Your verification code is '.$pin.'. Note the code expires within 10 minutes.';
-        
-
-// Create SMS Body for request
-$sms_body = array(
-    'action' => 'send-sms',
-    'api_key' => $api_key,
-    'to' => $destination,
-    'from' => $from,
-    'sms' => $sms
+// Prepare JSON request body for Onfon Media API
+$request_body = array(
+    'SenderId' => $sender_id,
+    'MessageParameters' => array(
+        array(
+            'Number' => $destination,
+            'Text' => $sms_text
+        )
+    ),
+    'ApiKey' => $api_key,
+    'ClientId' => $client_id
 );
 
-$send_data = http_build_query($sms_body);
-
-$gateway_url = $url . "?" . $send_data;
+$json_data = json_encode($request_body);
 
 try {
+    // Initialize cURL for POST request
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $gateway_url);
+    curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPGET, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'AccessKey: ' . $access_key,
+        'Content-Type: application/json'
+    ));
+    
     $output = curl_exec($ch);
-
+    
     if (curl_errno($ch)) {
         $output = curl_error($ch);
+        error_log("SMS API Error: " . $output);
     }
     curl_close($ch);
 
-    $query= "insert into sma_verify_code (user_id,token,expiry,customer_id) values (?,?,?,?)";
-            // prepare query statement
-            $stmt = $conn->prepare($query);
-            $stmt->bindParam(1, $user_id);
-            $stmt->bindValue(2, $pin);
-            $stmt->bindValue(3, date('Y-m-d H:i:s', strtotime("+10 min")));
-            $stmt->bindParam(4, $customer_id);
-  
-            // execute query
-            $stmt->execute();
+    // Save verification code to database
+    $query = "insert into sma_verify_code (user_id,token,expiry,customer_id) values (?,?,?,?)";
+    $stmt = $conn->prepare($query);
+    $stmt->bindParam(1, $user_id);
+    $stmt->bindValue(2, $pin);
+    $stmt->bindValue(3, date('Y-m-d H:i:s', strtotime("+10 min")));
+    $stmt->bindParam(4, $customer_id);
+    $stmt->execute();
 
 }catch (Exception $exception){
     echo $exception->getMessage();
+    error_log("SMS Exception: " . $exception->getMessage());
 }
 
 function fieldRequired($fieldName){
