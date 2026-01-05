@@ -48,8 +48,14 @@ function confirmCode($verification_code, $signature, $user_id, $customer_id, $ch
                 $time = time();
                 $path = "../uploads/$time.png";
                 $path2 = "../uploads/Cheque$time.png";
-                $final_path = "https://powergas-home.techsavanna.technology/powergas_app/uploads/".$time.".png";
-                $final_path2 = "https://powergas-home.techsavanna.technology/powergas_app/uploads/Cheque".$time.".png";
+                
+                // Detect environment: local vs production
+                // API is on separate container (port 8083 for production, 8075 for local)
+                $is_local = (isset($_SERVER['HTTP_HOST']) && ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['HTTP_HOST'] == '127.0.0.1' || strpos($_SERVER['HTTP_HOST'], 'localhost') !== false));
+                $base_url = $is_local ? "http://localhost:8075/api_powergas/uploads/" : "http://powergas.techsavanna.co.ke:8083/uploads/";
+                
+                $final_path = $base_url . $time . ".png";
+                $final_path2 = $base_url . "Cheque" . $time . ".png";
                 if(file_put_contents($path,base64_decode($signature))){
                     if($cheque_image != null){
                         if(file_put_contents($path2,base64_decode($cheque_image))){
