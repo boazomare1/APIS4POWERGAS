@@ -1,8 +1,11 @@
 <?php
 
-include_once("../common/common.php");
+include_once "../common/common.php";
 
 date_default_timezone_set('Africa/Nairobi');
+
+// Constants to avoid code duplication
+define('ERROR_MESSAGE_FAILED', 'Failed: ');
 
 // Suppress HTML error output - return clean JSON
 ini_set('display_errors', 0);
@@ -138,7 +141,7 @@ function fetchShopIdsForAllocationIds($vehicle_id, $day)
         return ["success" => "1", "message" => "ok", "data" => $shopIds];
 
     } catch (PDOException $e) {
-        return ["success" => "0", "message" => "Failed: " . $e->getMessage(), "data" => []];
+        return ["success" => "0", "message" => ERROR_MESSAGE_FAILED . $e->getMessage(), "data" => []];
     }
 }
 
@@ -280,7 +283,7 @@ function fetchCustomers($vehicle_id, $day, $salesman_id)
             return array("success" => "1", "message" => "no data available", "data" => []);
         }
     } catch (PDOException $e) {
-        return array("success" => "0", "message" => "Failed: " . $e->getMessage(), "data" => []);
+        return array("success" => "0", "message" => ERROR_MESSAGE_FAILED . $e->getMessage(), "data" => []);
     }
 }
 
@@ -443,7 +446,7 @@ function checkSalesStatus($salesman_id, $vehicle_id, $day)
     } catch (PDOException $e) {
         return [
             "success" => "0",
-            "message" => "Failed: " . $e->getMessage(),
+            "message" => ERROR_MESSAGE_FAILED . $e->getMessage(),
             "total_customers" => 0,
             "actual_sales" => 0,
             "ticket_sales_count" => 0,
@@ -608,8 +611,9 @@ function addCustomerToAccount($name, $customer_id, $town_id)
     // FIX: Check if response_data is valid before iterating
     if (is_array($response_data) || is_object($response_data)) {
         foreach ($response_data as $itemObj) {
+            // Status is checked but not used - kept for potential future use
             if (isset($itemObj->Status)) {
-                $status = $itemObj->Status;
+                // Status available if needed
             }
         }
     }
@@ -807,7 +811,7 @@ function resetTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor
         $conn->commit();
 
         // Return a success response
-        $response = [
+        return [
             "success" => true,
             "message" => "Ticket status reset successfully",
             "data" => [
@@ -819,8 +823,6 @@ function resetTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor
                 "vehicle_id" => $vehicle_id
             ]
         ];
-
-        return $response;
     } catch (Exception $e) {
         // Rollback the transaction on error
         $conn->rollBack();
@@ -829,13 +831,11 @@ function resetTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor
         error_log($e->getMessage());
 
         // Return an error response
-        $errorResponse = [
+        return [
             "success" => false,
             "message" => "Failed to reset ticket status",
             "error" => $e->getMessage()
         ];
-
-        return $errorResponse;
     }
 }
 

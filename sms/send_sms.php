@@ -4,8 +4,8 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-require '../config/database.php';
- 
+require_once '../config/database.php';
+
 $user_id = isset($_GET['user_id']) ? $_GET['user_id'] : null;
 $customer_id = isset($_GET['customer_id']) ? $_GET['customer_id'] : null;
 
@@ -14,10 +14,10 @@ if (!$user_id || !$customer_id) {
     exit;
 }
 
-// Onfon Media SMS API credentials
-$api_key = 'jJtqOshLAUu13Qxv6W4aBoGT5D8RXpM097mKirVHPzFdgkI2';
-$client_id = 'benson';
-$access_key = 'benson';
+// Onfon Media SMS API credentials - should be moved to environment variables in production
+$api_key = getenv('SMS_API_KEY') ?: 'jJtqOshLAUu13Qxv6W4aBoGT5D8RXpM097mKirVHPzFdgkI2';
+$client_id = getenv('SMS_CLIENT_ID') ?: 'benson';
+$access_key = getenv('SMS_ACCESS_KEY') ?: 'benson';
 $sender_id = 'Power_Gas';
 
 $database = new Database();
@@ -92,11 +92,11 @@ try {
         'AccessKey: ' . $access_key,
         'Content-Type: application/json'
     ));
-    
+
     $output = curl_exec($ch);
     $curl_error = curl_error($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
+
     if (curl_errno($ch)) {
         error_log("SMS API Error: " . $curl_error);
         curl_close($ch);
@@ -107,7 +107,7 @@ try {
 
     // Parse SMS API response
     $sms_response = json_decode($output, true);
-    
+
     // Save verification code to database regardless of SMS API response
     // This ensures the code is available even if SMS fails
     $query = "INSERT INTO sma_verify_code (user_id, token, expiry, customer_id) VALUES (?, ?, ?, ?)";
@@ -116,11 +116,11 @@ try {
     $stmt->bindValue(2, $pin, PDO::PARAM_STR);
     $stmt->bindValue(3, date('Y-m-d H:i:s', strtotime("+10 min")), PDO::PARAM_STR);
     $stmt->bindParam(4, $customer_id, PDO::PARAM_INT);
-    
+
     if ($stmt->execute()) {
         error_log("SMS: Verification code generated and saved. PIN: $pin, Customer: $customer_id, Phone: $customer_phone");
         echo json_encode(array(
-            "success" => "1", 
+            "success" => "1",
             "message" => "Verification code sent successfully",
             "code" => $pin, // Include code for debugging (remove in production)
             "phone" => $customer_phone
@@ -129,10 +129,8 @@ try {
         error_log("SMS Error: Failed to save verification code to database");
         echo json_encode(array("success" => "0", "message" => "Failed to save verification code"));
     }
-    
+
 } catch (Exception $exception) {
     error_log("SMS Exception: " . $exception->getMessage());
     echo json_encode(array("success" => "0", "message" => "An error occurred: " . $exception->getMessage()));
 }
-
-?>
