@@ -48,3 +48,6 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Uploaded files (user-generated content)
+uploads/
+
