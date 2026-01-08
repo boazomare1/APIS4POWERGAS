@@ -1,6 +1,6 @@
 <?php
 
-include ("../common/common.php");
+include_once("../common/common.php");
 
 date_default_timezone_set('Africa/Nairobi');
 
@@ -94,7 +94,7 @@ function fetchShopIdsForAllocationIds($vehicle_id, $day)
             SELECT allocation_id
             FROM sma_temporary_alloc_disable
             WHERE vehicle_id = :vehicle_id
-            AND day_no = :day_no 
+            AND day_no = :day_no
             AND DATE(disabled_date) = :current_date
         ";
 
@@ -186,45 +186,45 @@ function fetchCustomers($vehicle_id, $day, $salesman_id)
             $exclusionQuery = " AND sma_shops.id NOT IN ($shopIdsList)";
         }
 
-        $query = "SELECT 
-                    sma_customers.id AS id, 
-                    sma_customers.name, 
-                    sma_customers.phone, 
-                    sma_customers.active, 
-                    sma_customers.email, 
-                    sma_customers.customer_group_id, 
-                    sma_customers.customer_group_name, 
-                    sma_shops.image AS logo, 
-                    sma_shops.shop_name, 
-                    sma_shops.id AS shop_id, 
-                    sma_shops.lat, 
-                    sma_shops.lng, 
-                    sma_currencies.french_name AS county_name, 
-                    sma_cities.city AS town_name, 
+        $query = "SELECT
+                    sma_customers.id AS id,
+                    sma_customers.name,
+                    sma_customers.phone,
+                    sma_customers.active,
+                    sma_customers.email,
+                    sma_customers.customer_group_id,
+                    sma_customers.customer_group_name,
+                    sma_shops.image AS logo,
+                    sma_shops.shop_name,
+                    sma_shops.id AS shop_id,
+                    sma_shops.lat,
+                    sma_shops.lng,
+                    sma_currencies.french_name AS county_name,
+                    sma_cities.city AS town_name,
                     sma_cities.id AS town_id
-                FROM 
+                FROM
                     sma_shops
                     LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
                     LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
                     LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
-                    LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
+                    LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id
                     LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
                     LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
-                    LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
-                    LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
-                WHERE 
+                    LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id
+                    LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id
+                WHERE
                     NOT EXISTS (
                         SELECT 1
                         FROM sma_sales
-                        WHERE sma_shops.id = sma_sales.shop_id 
-                            AND DATE(sma_sales.date) = CURDATE() 
+                        WHERE sma_shops.id = sma_sales.shop_id
+                            AND DATE(sma_sales.date) = CURDATE()
                             AND sma_sales.created < :current_date
-                    ) 
+                    )
                     AND NOT EXISTS (
                         SELECT 1
                         FROM sma_tickets
-                        WHERE sma_shops.id = sma_tickets.shop_id 
-                            AND DATE(sma_tickets.date) = CURDATE() 
+                        WHERE sma_shops.id = sma_tickets.shop_id
+                            AND DATE(sma_tickets.date) = CURDATE()
                             AND sma_tickets.created_at < :current_date2
                     )
 
@@ -246,18 +246,18 @@ function fetchCustomers($vehicle_id, $day, $salesman_id)
                      WHERE sma_shops.id = sma_invoices.shop_id
                            AND DATE(sma_invoices.date) = CURDATE()
                     )
-                    AND sma_vehicles.id = :vehicle_id 
-                    AND sma_customers.active = 1 
+                    AND sma_vehicles.id = :vehicle_id
+                    AND sma_customers.active = 1
                     AND (
-                        (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
+                        (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE())
                         OR sma_allocation_days.active = 1
                     )
-                    AND sma_allocation_days.day = :day 
+                    AND sma_allocation_days.day = :day
                     AND sma_vehicle_route.day = :day2
                     $exclusionQuery
-                GROUP BY 
-                    sma_shops.id 
-                ORDER BY 
+                GROUP BY
+                    sma_shops.id
+                ORDER BY
                     sma_allocation_days.position ASC";
 
         // Bind parameters and execute the query
@@ -313,19 +313,19 @@ function checkSalesStatus($salesman_id, $vehicle_id, $day)
             LEFT JOIN sma_customers ON sma_customers.id = sma_shops.customer_id
             LEFT JOIN sma_cities ON sma_cities.id = sma_customers.city
             LEFT JOIN sma_currencies ON sma_currencies.id = sma_cities.county_id
-            LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id 
+            LEFT JOIN sma_shop_allocations ON sma_shop_allocations.shop_id = sma_shops.id
             LEFT JOIN sma_vehicle_route ON sma_shop_allocations.route_id = sma_vehicle_route.route_id
             LEFT JOIN sma_vehicles ON sma_vehicle_route.vehicle_id = sma_vehicles.id
-            LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id 
-            LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id 
-            WHERE 
-                sma_vehicles.id = :vehicle_id 
-                AND sma_customers.active = 1 
+            LEFT JOIN sma_routes ON sma_vehicle_route.route_id = sma_routes.id
+            LEFT JOIN sma_allocation_days ON sma_allocation_days.allocation_id = sma_shop_allocations.id
+            WHERE
+                sma_vehicles.id = :vehicle_id
+                AND sma_customers.active = 1
                 AND (
-                    (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE()) 
+                    (sma_allocation_days.active = 0 AND DATE(sma_allocation_days.disabled_date) != CURDATE())
                     OR sma_allocation_days.active = 1
-                ) 
-                AND sma_allocation_days.day = :day 
+                )
+                AND sma_allocation_days.day = :day
                 AND sma_vehicle_route.day = :day2";
 
         // Add NOT IN clause if there are shop IDs to exclude
@@ -604,7 +604,7 @@ function addCustomerToAccount($name, $customer_id, $town_id)
     curl_close($curl);
 
     $response_data = json_decode($response);
-    
+
     // FIX: Check if response_data is valid before iterating
     if (is_array($response_data) || is_object($response_data)) {
         foreach ($response_data as $itemObj) {
@@ -732,7 +732,7 @@ function raiseTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor
                         VALUES (:distributor_id, :salesman_id, :customer_id, :vehicle_id, :shop_id, :reason, :date, :created_at, 1)";
         $stmtInsert = $conn->prepare($insertQuery);
         date_default_timezone_set('Africa/Nairobi');
-        
+
         $date = date("Y-m-d");
         $created_at = date("Y-m-d H:i:s");
 
@@ -899,5 +899,3 @@ function makeSale($discount, $invoice, $cheque, $image, $invoice_id, $discount_i
         ];
     }
 }
-
-?>

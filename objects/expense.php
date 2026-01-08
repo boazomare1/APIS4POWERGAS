@@ -78,7 +78,7 @@ class Expenses{
         
         $time = time();
         $path = "../uploads/$time.png";
-        $final_path = "https://powergas-home.techsavanna.technology/powergas_app/uploads/".$time.".png";
+        $final_path = "http://powergas.techsavanna.co.ke:8083/uploads/".$time.".png";
         if(file_put_contents($path,base64_decode($image))){
             
         try {

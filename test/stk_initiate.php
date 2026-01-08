@@ -40,7 +40,7 @@
   $initiate_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
   # callback url
-  $CallBackURL = 'https://powergas-home.techsavanna.technology/powergas_app/trans/callback_url.php';  
+  $CallBackURL = 'http://powergas.techsavanna.co.ke:8083/trans/callback_url.php';  
 
   $curl = curl_init($access_token_url);
   curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);

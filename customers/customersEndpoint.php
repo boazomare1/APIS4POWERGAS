@@ -34,6 +34,19 @@ if($action == "fetch_customers"){
     echo json_encode($response);
     
 }
+
+if ($action == "raise_ticket") {
+    $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : 0;
+    $salesman_id = isset($_GET['salesman_id']) ? intval($_GET['salesman_id']) : 0;
+    $reason = isset($_GET['reason']) ? $_GET['reason'] : '';
+    $shop_id = isset($_GET['shop_id']) ? intval($_GET['shop_id']) : 0;
+    $distributor_id = isset($_GET['distributor_id']) ? intval($_GET['distributor_id']) : 0;
+    $vehicle_id = isset($_GET['vehicle_id']) ? intval($_GET['vehicle_id']) : 0;
+
+    $response = raiseTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor_id, $vehicle_id);
+    echo json_encode($response);
+}
+
 if ($action == "check_sales_status") {
     $salesmanId = isset($_GET['salesman_id']) ? intval($_GET['salesman_id']) : null;
     $vehicleId = isset($_GET['vehicle_id']) ? intval($_GET['vehicle_id']) : null;
@@ -54,20 +67,6 @@ if ($action == "check_sales_status") {
 
     // Call the function to check sales status
     $response = checkSalesStatus($salesmanId, $vehicleId, $day);
-    echo json_encode($response);
-}
-
-
-
-if ($action == "raise_ticket") {
-    $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : 0;
-    $salesman_id = isset($_GET['salesman_id']) ? intval($_GET['salesman_id']) : 0;
-    $reason = isset($_GET['reason']) ? $_GET['reason'] : '';
-    $shop_id = isset($_GET['shop_id']) ? intval($_GET['shop_id']) : 0;
-    $distributor_id = isset($_GET['distributor_id']) ? intval($_GET['distributor_id']) : 0;
-    $vehicle_id = isset($_GET['vehicle_id']) ? intval($_GET['vehicle_id']) : 0;
-
-    $response = raiseTicket($customer_id, $salesman_id, $reason, $shop_id, $distributor_id, $vehicle_id);
     echo json_encode($response);
 }
 

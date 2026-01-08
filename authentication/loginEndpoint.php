@@ -1,32 +1,40 @@
 <?php
-/**
- * API Login Endpoint for PowerGas Mobile App
- */
+// required headers
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
 
-// Convert GET params to POST if needed
-if (!empty($_GET['email']) && empty($_POST['email'])) {
-    $_POST['email'] = $_GET['email'];
-    $_POST['password'] = isset($_GET['password']) ? $_GET['password'] : '';
+// Get the base directory - use absolute path
+$base_dir = '/opt/lampp/htdocs/api_powergas';
+
+require_once $base_dir . '/config/database.php';
+require_once $base_dir . '/objects/login.php';
+
+// Get email and password from GET or POST
+$email = isset($_GET['email']) ? $_GET['email'] : (isset($_POST['email']) ? $_POST['email'] : '');
+$password = isset($_GET['password']) ? $_GET['password'] : (isset($_POST['password']) ? $_POST['password'] : '');
+$app_version = isset($_GET['app_version']) ? $_GET['app_version'] : (isset($_POST['app_version']) ? $_POST['app_version'] : null);
+
+// Support both old format (with action) and new format (without action)
+$action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : 'login_user');
+
+if (empty($email) || empty($password)) {
+    http_response_code(400);
+    echo json_encode(array("success" => "0", "message" => "Email and password are required"));
+    exit;
 }
 
-// Make internal HTTP request to CodeIgniter API
-$url = 'http://localhost/api/login';
-$postData = http_build_query(array(
-    'email' => isset($_POST['email']) ? $_POST['email'] : $_GET['email'],
-    'password' => isset($_POST['password']) ? $_POST['password'] : (isset($_GET['password']) ? $_GET['password'] : '')
-));
+if($action == "login_user"){
+    $database = new Database();
+    $conn = $database->getConnection();
+    
+    $login = new Login($conn);
+    $response = $login->loginUser($email, $password, $app_version);
+    
+    http_response_code(200);
+    echo json_encode($response);
+    exit;
+}
 
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
-
-header('Content-Type: application/json');
-http_response_code($httpCode);
-echo $response;
+http_response_code(400);
+echo json_encode(array("success" => "0", "message" => "Invalid action"));
+exit;
